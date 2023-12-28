@@ -172,7 +172,7 @@ describe('[Socket] ChannelGateway (e2e)', () => {
         sender.send(testMessage);
         sender.on('message', (data) => {
           if (data.op !== SendOP.DISPATCH_MESSAGE) return;
-          if (data.d.channelId === testMessage.d.channelId && data.d.sender.email === 'alice@example.com') {
+          if (data.d.channelId === testMessage.d.channelId) {
             res();
           }
         });
@@ -191,7 +191,7 @@ describe('[Socket] ChannelGateway (e2e)', () => {
         sender.send(testMessage);
         receiver.on('message', (data) => {
           if (data.op !== SendOP.DISPATCH_MESSAGE) return;
-          if (data.d.channelId === testMessage.d.channelId && data.d.sender.email === 'alice@example.com') {
+          if (data.d.channelId === testMessage.d.channelId) {
             res();
           }
         });

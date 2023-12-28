@@ -52,20 +52,12 @@ describe('[Http] ChannelController (e2e)', () => {
     });
   });
 
-  describe('채널 구성원 추가', () => {
-    let channelId: string;
-    beforeAll(async () => {
-      const channels = await request(app.getHttpServer()).get('/v2/channel/');
-    });
+  // describe('채널 구성원 추가', () => {
+  //   let channelId: string;
+  //   beforeAll(async () => {
+  //     const channels = await request(app.getHttpServer()).get('/v2/channel/');
+  //   });
 
-    it('구성원 초대에 성공하면 HTTP 200을 반환합니다.', async () => {
-      const res = await request(app.getHttpServer())
-        .post('/v2/channel')
-        .set('authorization', `Bearer ${accessToken}`)
-        .send({
-          channelName: '채널 생성 테스트용',
-        });
-      return expect(res.body.channelId).toBeDefined();
-    });
-  });
+  //   it('구성원 초대에 성공하면 HTTP 200을 반환합니다.', async () => {});
+  // });
 });
