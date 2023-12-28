@@ -1,6 +1,7 @@
 import { INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TestingModule, Test } from '@nestjs/testing';
+import { log } from 'console';
 import { Socket } from 'socket.io';
 import { AppModule } from 'src/app.module';
 import * as request from 'supertest';
@@ -40,7 +41,7 @@ describe('[Http] ChannelController (e2e)', () => {
     await app.close();
   });
 
-  describe('채널 관리', () => {
+  describe('채널 생성', () => {
     it('채널 생성에 성공하면 채널의 ID 를 반환합니다.', async () => {
       const res = await request(app.getHttpServer())
         .post('/v2/channel')
@@ -52,12 +53,32 @@ describe('[Http] ChannelController (e2e)', () => {
     });
   });
 
-  // describe('채널 구성원 추가', () => {
-  //   let channelId: string;
-  //   beforeAll(async () => {
-  //     const channels = await request(app.getHttpServer()).get('/v2/channel/');
-  //   });
+  describe('채널 참여', () => {
+    let channelId: string;
+    let newMemeberAccess: string;
+    beforeAll(async () => {
+      channelId = await request(app.getHttpServer())
+        .post('/v2/channel')
+        .set('authorization', `Bearer ${accessToken}`)
+        .send({
+          channelName: '채널 참여 테스트용',
+        })
+        .then(({ body }) => body.channelId);
+      newMemeberAccess = accessToken = await request(app.getHttpServer())
+        .post('/v1/auth/login')
+        .send({
+          email: 'bob@example.com',
+          password: 'test',
+        })
+        .then(({ body }) => body.accessToken);
+    });
 
-  //   it('구성원 초대에 성공하면 HTTP 200을 반환합니다.', async () => {});
-  // });
+    it('채널 참여에 성공하면 HTTP 200을 반환합니다.', async () => {
+      const res = await request(app.getHttpServer())
+        .get(`/v2/channel/${channelId}/join`)
+        .set('authorization', `Bearer ${newMemeberAccess}`);
+
+      return expect(res.body.channelId).toBeDefined();
+    });
+  });
 });
