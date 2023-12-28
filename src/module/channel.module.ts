@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { ChatController } from 'src/controller/chat.controller';
 import { CassandraService } from 'src/injectable/service/cassandra.service';
 import { ChannelService } from 'src/injectable/service/channel.service';
 import { SocketService } from 'src/injectable/service/socket.service';
@@ -14,7 +13,7 @@ import { ChannelController } from 'src/controller/channel.controller';
 
 @Module({
   imports: [],
-  controllers: [ChatController, ChannelController],
+  controllers: [ChannelController],
   providers: [
     ChannelGateway,
     SocketService,
@@ -29,4 +28,4 @@ import { ChannelController } from 'src/controller/channel.controller';
   ],
   exports: [CassandraService],
 })
-export class ChatModule {}
+export class ChannelModule {}
