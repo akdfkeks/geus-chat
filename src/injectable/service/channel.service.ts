@@ -113,17 +113,6 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
     return this.memberRepository.findChannelMembers(channelId);
   }
 
-  public async inviteUserToChannel(channelId: string, userId: number) {
-    await this.checkChannelExists(channelId);
-
-    const clientId = await this.connectionService.getClientId(userId);
-    // if client is online
-    if (clientId) {
-      const client = (await this.server.in(clientId).fetchSockets())[0];
-      client.join(channelId);
-    }
-  }
-
   private async checkMessagePermission(client: Socket, message: Message) {
     if (!client.rooms.has(message.d.channelId)) {
       throw new GatewayException(error.NO_PERMISSION);
