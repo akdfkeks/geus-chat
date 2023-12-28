@@ -16,7 +16,7 @@ export class ChannelController {
   }
 
   /**
-   * Test Only
+   * Dev Only
    */
   @Post('/')
   public async onCreateChannelRequest(@ReqUser() user: JWTPayload, @Body() body: any) {
@@ -25,7 +25,7 @@ export class ChannelController {
   }
 
   /**
-   * Test Only
+   * Dev Only
    */
   @Get('/:channelId/join')
   public async onChannelJoinRequest(@ReqUser() user: JWTPayload, @Param('channelId') channelId: string) {
