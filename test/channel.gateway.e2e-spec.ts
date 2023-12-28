@@ -5,7 +5,7 @@ import { Socket, io } from 'socket.io-client';
 import { RecvOP, SendOP } from 'src/common/structure/Message';
 import { RedisIoAdapter } from 'src/adapter/redis.adapter';
 import { ConfigService } from '@nestjs/config';
-import { Payload, Message } from 'src/common/structure/Message';
+import { RecvPayload, Message } from 'src/common/structure/Message';
 import { AuthService } from 'src/injectable/service/auth.service';
 import * as error from 'src/common/structure/Exception';
 import * as request from 'supertest';
@@ -90,7 +90,7 @@ describe('[Socket] ChannelGateway (e2e)', () => {
     });
 
     it('인증에 성공하면 참여중인 채널 정보를 수신합니다.', async () => {
-      const identify: Message<Payload.Identify> = {
+      const identify: Message<RecvPayload.Identify> = {
         op: RecvOP.IDENTIFY,
         d: { accessToken },
       };
@@ -110,11 +110,11 @@ describe('[Socket] ChannelGateway (e2e)', () => {
     let senderChannels: Array<string>;
     let receiverChannels: Array<string>;
     beforeAll(async () => {
-      const senderIdentify: Message<Payload.Identify> = {
+      const senderIdentify: Message<RecvPayload.Identify> = {
         op: RecvOP.IDENTIFY,
         d: { accessToken: senderAccess },
       };
-      const receiverIdentify: Message<Payload.Identify> = {
+      const receiverIdentify: Message<RecvPayload.Identify> = {
         op: RecvOP.IDENTIFY,
         d: { accessToken: senderAccess },
       };
@@ -142,7 +142,7 @@ describe('[Socket] ChannelGateway (e2e)', () => {
     });
 
     it('참여중이지 않은 채널에 전송을 시도하면 오류를 반환합니다.', async () => {
-      const testMessage: Message<Payload.Text> = {
+      const testMessage: Message<RecvPayload.Text> = {
         op: RecvOP.SEND_MESSAGE,
         d: {
           channelId: ulid(),
@@ -161,7 +161,7 @@ describe('[Socket] ChannelGateway (e2e)', () => {
     });
 
     it('전송 성공 시 전송한 메세지를 수신합니다.', async () => {
-      const testMessage: Message<Payload.Text> = {
+      const testMessage: Message<RecvPayload.Text> = {
         op: RecvOP.SEND_MESSAGE,
         d: {
           channelId: senderChannels[0],
@@ -180,7 +180,7 @@ describe('[Socket] ChannelGateway (e2e)', () => {
     });
 
     it('다른 사용자가 전송한 메세지를 수신합니다.', async () => {
-      const testMessage: Message<Payload.Text> = {
+      const testMessage: Message<RecvPayload.Text> = {
         op: RecvOP.SEND_MESSAGE,
         d: {
           channelId: senderChannels[0],
