@@ -24,17 +24,26 @@ export class ChannelController {
     return { channelId };
   }
 
+  /**
+   * Test Only
+   */
+  @Get('/:channelId/join')
+  public async onChannelJoinRequest(@ReqUser() user: JWTPayload, @Param('channelId') channelId: string) {
+    const result = await this.channelService.addMemberToChannel(user, channelId);
+    return result;
+  }
+
   @Get('/:channelId/member')
   public async onChannelMemberListRequest(@Param('channelId') channelId: string) {
     const result = await this.channelService.getChannelMembers(channelId);
     return { members: result };
   }
 
-  @Post('/:channelId/member')
-  public async onChannelMemberInviteRequest(@Param() channelId: string, @Body('userId') userId: number) {
-    const result = await this.channelService.inviteUserToChannel(channelId, userId);
-    return result;
-  }
+  // @Post('/:channelId/member')
+  // public async onChannelMemberInviteRequest(@Param('channelId') channelId: string, @Body('userId') userId: number) {
+  //   const result = await this.channelService.inviteUserToChannel(channelId, userId);
+  //   return result;
+  // }
 
   // @Delete('/:channelId/member')
   // public async onKickChannelMemberRequest(@Param() channelId: string, @Body('email') email: string) {

@@ -53,10 +53,12 @@ export class ChannelRepository {
   }
 
   public async addMemberToChannel(userId: number, channelId: string) {
-    return this.prisma.gh_MemberInChannel.upsert({
+    const rst = await this.prisma.gh_MemberInChannel.upsert({
       where: { user_id_channel_id: { user_id: userId, channel_id: channelId } },
       update: {},
       create: { user_id: userId, channel_id: channelId },
     });
+
+    return { channelId: rst.channel_id, userId: rst.user_id };
   }
 }

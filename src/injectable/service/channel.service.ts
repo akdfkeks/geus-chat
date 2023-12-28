@@ -2,8 +2,8 @@ import { Injectable, OnModuleInit, OnModuleDestroy, UseFilters } from '@nestjs/c
 import { Server, Socket } from 'socket.io';
 import { GatewayException } from 'src/common/structure/Exception';
 import * as error from 'src/common/structure/Exception';
-import { RecvOP, SendOP } from 'src/common/structure/Message';
-import { Payload, Message } from 'src/common/structure/Message';
+import { RecvOP, SendOP, SendPayload } from 'src/common/structure/Message';
+import { RecvPayload, Message } from 'src/common/structure/Message';
 import { UserService } from './user.service';
 import { AuthService } from './auth.service';
 import typia from 'typia';
@@ -60,7 +60,7 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
   public async sendMessage(server: Server, client: Socket, message: Message) {
     this.isClientIdentified(client);
 
-    typia.assertEquals<Message<Payload.Text>>(message);
+    typia.assertEquals<Message<RecvPayload.Text>>(message);
 
     const msg: Message = {
       op: SendOP.DISPATCH_MESSAGE,
@@ -71,7 +71,7 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
   }
 
   public async identifyClient(client: Socket, message: Message) {
-    typia.assertEquals<Message<Payload.Identify>>(message);
+    typia.assertEquals<Message<RecvPayload.Identify>>(message);
 
     const { id: userId } = this.authService.verifyAccessToken(message.d.accessToken);
     await this.initializeClient(client, userId);
@@ -153,6 +153,8 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
     if (!channel) throw new GatewayException(error.CHANNEL_NOT_FOUND);
 
     await this.connectionService.cacheChannels(channelId);
+
+    return true;
   }
 
   public async createChannel(user: JWTPayload, dto: any) {
@@ -162,5 +164,27 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
 
   public async getJoinedChannels(user: JWTPayload) {
     return this.channelRepository.getJoinedChannelListByUserId(user.id);
+  }
+
+  public async addMemberToChannel(user: JWTPayload, channelId: string) {
+    await this.checkChannelExists(channelId);
+    const result = await this.channelRepository.addMemberToChannel(user.id, channelId);
+
+    const clientId = await this.connectionService.getClientId(user.id);
+    // if client is online
+    if (clientId) {
+      const client = (await this.server.in(clientId).fetchSockets())[0];
+      const newChannel: Message<SendPayload.UpdateChannel> = {
+        op: SendOP.UPDATE_CHANNEL,
+        d: {
+          channelId: result.channelId,
+          members: false,
+        },
+      };
+      client.join(channelId);
+      client.emit('message', newChannel);
+    }
+
+    return result;
   }
 }
