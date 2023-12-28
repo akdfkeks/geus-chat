@@ -9,15 +9,15 @@ export class UserRepository {
     return this.prisma.gh_User.findUnique({ where: { email } });
   }
 
-  public async upsertChannelRefreshToken(userEmail: string, refreshToken: string) {
+  public async upsertChannelRefreshToken(userId: number, refreshToken: string) {
     return this.prisma.gh_Channel_Token.upsert({
-      where: { user_email: userEmail },
-      create: { user_email: userEmail, refresh_token: refreshToken },
+      where: { user_id: userId },
+      create: { user_id: userId, refresh_token: refreshToken },
       update: { refresh_token: refreshToken },
     });
   }
 
-  public async findRefreshTokenByEmail(email: string) {
-    return this.prisma.gh_Channel_Token.findUnique({ where: { user_email: email } });
+  public async findRefreshTokenByUserId(userId: number) {
+    return this.prisma.gh_Channel_Token.findUnique({ where: { user_id: userId } });
   }
 }

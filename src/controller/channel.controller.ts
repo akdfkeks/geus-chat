@@ -31,13 +31,13 @@ export class ChannelController {
   }
 
   @Post('/:channelId/member')
-  public async onChannelMemberInviteRequest(@Param() channelId: string, @Body('email') email: string) {
-    const result = await this.channelService.inviteUserToChannel(email, channelId);
+  public async onChannelMemberInviteRequest(@Param() channelId: string, @Body('userId') userId: number) {
+    const result = await this.channelService.inviteUserToChannel(channelId, userId);
     return result;
   }
 
-  @Delete('/:channelId/member')
-  public async onKickChannelMemberRequest(@Param() channelId: string, @Body('email') email: string) {
-    return {};
-  }
+  // @Delete('/:channelId/member')
+  // public async onKickChannelMemberRequest(@Param() channelId: string, @Body('email') email: string) {
+  //   return {};
+  // }
 }

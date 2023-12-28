@@ -30,27 +30,27 @@ async function main() {
     skipDuplicates: true,
     data: [
       {
-        user_email: 'alice@example.com',
+        user_id: users[0].user_id,
         channel_id: channelIds[0],
       },
       {
-        user_email: 'alice@example.com',
+        user_id: users[0].user_id,
         channel_id: channelIds[1],
       },
       {
-        user_email: 'alice@example.com',
+        user_id: users[0].user_id,
         channel_id: channelIds[2],
       },
       {
-        user_email: 'bob@example.com',
+        user_id: users[1].user_id,
         channel_id: channelIds[0],
       },
       {
-        user_email: 'bob@example.com',
+        user_id: users[1].user_id,
         channel_id: channelIds[2],
       },
       {
-        user_email: 'joi@example.com',
+        user_id: users[2].user_id,
         channel_id: channelIds[3],
       },
     ],

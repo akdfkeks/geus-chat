@@ -33,8 +33,8 @@ export class ChatController {
   }
 
   @Post('/:channelId/member')
-  public async inviteMemberToChannel(@Param() channelId: string, @Body() email: string) {
-    const result = await this.channelService.inviteUserToChannel(email, channelId);
+  public async inviteMemberToChannel(@Param() channelId: string, @Body('userId') userId: number) {
+    const result = await this.channelService.inviteUserToChannel(channelId, userId);
     return result;
   }
 }

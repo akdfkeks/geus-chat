@@ -11,7 +11,6 @@ export class ChannelMemberRepository {
       include: {
         user: {
           select: {
-            email: true,
             nickname: true,
             user_id: true,
             user_type: true,
@@ -20,7 +19,7 @@ export class ChannelMemberRepository {
       },
     });
     return members.map(({ user }) => {
-      return { email: user.email, id: user.user_id, type: user.user_type, nickname: user.nickname };
+      return { id: user.user_id, type: user.user_type, nickname: user.nickname };
     });
   }
 }

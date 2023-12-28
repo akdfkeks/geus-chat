@@ -30,17 +30,17 @@ export class ConnectionService implements OnModuleInit, OnModuleDestroy {
     return (await this.channels.sismember('channels', channelId)) === 1; // 1 is true
   }
 
-  public async registerClient(email: string, socketId: string) {
-    const rst = await this.clients.set(email, socketId);
+  public async registerClient(userId: number, socketId: string) {
+    const rst = await this.clients.set(userId.toString(), socketId);
     return rst === 'OK';
   }
 
-  public async deregisterClient(email: string) {
-    const rst = await this.clients.del(email);
+  public async deregisterClient(userId: number) {
+    const rst = await this.clients.del(userId.toString());
     return rst >= 1;
   }
 
-  public async getClientId(email: string) {
-    return await this.clients.get(email);
+  public async getClientId(userId: number) {
+    return await this.clients.get(userId.toString());
   }
 }

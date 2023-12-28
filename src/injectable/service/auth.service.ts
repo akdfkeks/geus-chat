@@ -22,11 +22,11 @@ export class AuthService {
     if (!isCorrectPw) throw new UnauthorizedException('Password incorrect');
 
     // get token generator by curried function
-    const tokenGenerator = JWTHelper.generate({ email });
+    const tokenGenerator = JWTHelper.generate({ id: user.user_id });
     const accessToken = tokenGenerator(JWT_ACCESS_SECRET)({ expiresIn: 100 });
     const refreshToken = tokenGenerator(JWT_REFRESH_SECRET)({ expiresIn: '7d' });
 
-    await this.userRepository.upsertChannelRefreshToken(email, refreshToken);
+    await this.userRepository.upsertChannelRefreshToken(user.user_id, refreshToken);
 
     return { accessToken, refreshToken };
   }
@@ -62,7 +62,7 @@ export class AuthService {
 
   public async refresh(accessToken: string, refreshToken: string) {
     const payload = JWTHelper.decode<JWTPayload>(accessToken)();
-    const refresh = await this.userRepository.findRefreshTokenByEmail(payload.email);
+    const refresh = await this.userRepository.findRefreshTokenByUserId(payload.id);
     if (!refresh) {
     }
   }

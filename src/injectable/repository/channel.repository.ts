@@ -10,13 +10,13 @@ export class ChannelRepository {
     return this.prisma.gh_ChannelInfo.findUnique({ where: { id: channelId } });
   }
 
-  public async createChannel(owner: string, name: string) {
+  public async createChannel(owner: number, name: string) {
     return this.prisma.gh_ChannelInfo.create({
       data: {
         id: ulid(),
         name,
-        owner: { connect: { email: owner } },
-        members: { create: { user_email: owner } },
+        owner: { connect: { user_id: owner } },
+        members: { create: { user_id: owner } },
       },
     });
   }
@@ -30,17 +30,17 @@ export class ChannelRepository {
     return rst.map(({ user }) => user);
   }
 
-  public async getJoinedChannelsIdByEmail(email: string) {
+  public async getJoinedChannelsIdByUserId(userId: number) {
     const rst = await this.prisma.gh_MemberInChannel.findMany({
-      where: { user_email: email },
+      where: { user_id: userId },
       select: { channel_id: true },
     });
     return rst.map((c) => c.channel_id);
   }
 
-  public async getJoinedChannelListByEmail(email: string) {
+  public async getJoinedChannelListByUserId(userId: number) {
     const rst = await this.prisma.gh_MemberInChannel.findMany({
-      where: { user_email: email },
+      where: { user_id: userId },
       include: { channel: true },
     });
     return rst.map((c) => {
@@ -52,11 +52,11 @@ export class ChannelRepository {
     });
   }
 
-  public async addMemberToChannel(userEmail: string, channelId: string) {
+  public async addMemberToChannel(userId: number, channelId: string) {
     return this.prisma.gh_MemberInChannel.upsert({
-      where: { user_email_channel_id: { user_email: userEmail, channel_id: channelId } },
+      where: { user_id_channel_id: { user_id: userId, channel_id: channelId } },
       update: {},
-      create: { user_email: userEmail, channel_id: channelId },
+      create: { user_id: userId, channel_id: channelId },
     });
   }
 }

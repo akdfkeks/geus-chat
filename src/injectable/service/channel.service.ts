@@ -73,22 +73,22 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
   public async identifyClient(client: Socket, message: Message) {
     typia.assertEquals<Message<Payload.Identify>>(message);
 
-    const { email } = this.authService.verifyAccessToken(message.d.accessToken);
-    await this.initializeClient(client, email);
+    const { id: userId } = this.authService.verifyAccessToken(message.d.accessToken);
+    await this.initializeClient(client, userId);
     const msg: Message = {
       op: SendOP.HELLO,
       d: {
-        email,
+        userId,
         channels: [...client.rooms].slice(1), // Client ID 제외
       },
     };
     client.send(msg);
   }
 
-  private async initializeClient(client: Socket, email: string) {
-    const { nickname, socialType } = await this.userService.getUserNickAndTypeByEmail(email);
-    const ids = await this.channelRepository.getJoinedChannelsIdByEmail(email);
-    this.initClientIdentifier(client, { email, nickname, socialType });
+  private async initializeClient(client: Socket, userId: number) {
+    const { nickname, socialType } = await this.userService.getUserNickAndTypeByUserId(userId);
+    const ids = await this.channelRepository.getJoinedChannelsIdByUserId(userId);
+    this.initClientIdentifier(client, { userId, nickname, socialType });
 
     await client.join(ids);
 
@@ -113,10 +113,10 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
     return this.memberRepository.findChannelMembers(channelId);
   }
 
-  public async inviteUserToChannel(channelId: string, email: string) {
+  public async inviteUserToChannel(channelId: string, userId: number) {
     await this.checkChannelExists(channelId);
 
-    const clientId = await this.connectionService.getClientId(email);
+    const clientId = await this.connectionService.getClientId(userId);
     // if client is online
     if (clientId) {
       const client = (await this.server.in(clientId).fetchSockets())[0];
@@ -136,7 +136,7 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
 
   private initClientIdentifier(client: Socket, payload: any) {
     client.data.user = {
-      email: payload.email,
+      id: payload.id,
       nickname: payload.nickname,
       socialType: payload.socialType,
     };
@@ -156,11 +156,11 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
   }
 
   public async createChannel(user: JWTPayload, dto: any) {
-    const channel = await this.channelRepository.createChannel(user.email, dto.channelName);
+    const channel = await this.channelRepository.createChannel(user.id, dto.channelName);
     return channel.id;
   }
 
   public async getJoinedChannels(user: JWTPayload) {
-    return this.channelRepository.getJoinedChannelListByEmail(user.email);
+    return this.channelRepository.getJoinedChannelListByUserId(user.id);
   }
 }
