@@ -12,6 +12,7 @@ import { ConnectionService } from './connection.service';
 import { PrismaService } from './prisma.service';
 import { ChannelMemberRepository } from 'src/injectable/repository/channel-member.repository';
 import { JWTPayload } from 'src/common/structure/Auth';
+import { Client } from 'src/common/structure/Client';
 
 @Injectable()
 export class ChannelService implements OnModuleInit, OnModuleDestroy {
@@ -57,14 +58,19 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
    * @param {object} message 유저가 전송한 메세지 객체
    * @throws {GatewayException, TypeGuardError}
    */
-  public async sendMessage(server: Server, client: Socket, message: Message) {
+  public async sendMessage(server: Server, client: Socket, message: Message<RecvPayload.Text>) {
     this.isClientIdentified(client);
 
     typia.assertEquals<Message<RecvPayload.Text>>(message);
 
     const msg: Message = {
       op: SendOP.DISPATCH_MESSAGE,
-      d: { ...message.d, sender: client.data.user },
+      d: {
+        channelId: message.d.channelId,
+        message: message.d.message,
+        timestamp: Date.now(),
+        sender: client.data.user,
+      },
     };
 
     return await this.dispatch(server, client, msg);
@@ -88,7 +94,7 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
   private async initializeClient(client: Socket, userId: number) {
     const { nickname, socialType } = await this.userService.getUserNickAndTypeByUserId(userId);
     const ids = await this.channelRepository.getJoinedChannelsIdByUserId(userId);
-    this.initClientIdentifier(client, { userId, nickname, socialType });
+    this.initClientIdentifier(client, { id: userId, nickname, socialType });
 
     await client.join(ids);
 
@@ -123,12 +129,8 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
     // 바로 저장 vs MQ 에 넘기기
   }
 
-  private initClientIdentifier(client: Socket, payload: any) {
-    client.data.user = {
-      id: payload.id,
-      nickname: payload.nickname,
-      socialType: payload.socialType,
-    };
+  private initClientIdentifier(client: Socket, data: Client.InitPayload) {
+    client.data.user = data;
   }
 
   private isClientIdentified(client: Socket) {
