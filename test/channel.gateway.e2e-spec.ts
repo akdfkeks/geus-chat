@@ -172,9 +172,12 @@ describe('[Socket] ChannelGateway (e2e)', () => {
         sender.send(testMessage);
         sender.on('message', (data) => {
           if (data.op !== SendOP.DISPATCH_MESSAGE) return;
-          if (data.d.channelId === testMessage.d.channelId) {
-            res();
-          }
+          expect(data.d.channelId).toBe(testMessage.d.channelId);
+          expect(data.d.message).toBe(testMessage.d.message);
+          expect(data.d.timestamp).toBeLessThanOrEqual(Date.now());
+          expect(data.d.sender.id).toBeDefined();
+          expect(data.d.sender.nickname).toBeDefined();
+          res();
         });
       });
     });
