@@ -31,8 +31,8 @@ export interface Message<PayloadType = any> {
 
 export enum SendOP {
   DISPATCH_MESSAGE = 0,
-  // DISPATCH_IMAGES = 1, using HTTP
-  // DISPATCH_FILES = 2,  using HTTP
+  DISPATCH_IMAGES = 1,
+  DISPATCH_FILES = 2,
   UPDATE_CHANNEL = 3,
   HELLO = 10,
   ERROR = 11,
@@ -40,8 +40,6 @@ export enum SendOP {
 
 export enum RecvOP {
   SEND_MESSAGE = 0,
-  SEND_IMAGES = 1,
-  SEND_FILES = 2,
   IDENTIFY = 10,
   RECONNECT = 11,
 }

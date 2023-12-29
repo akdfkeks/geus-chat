@@ -18,7 +18,6 @@ export class AuthService {
     if (!user) throw new NotFoundException('No such user');
 
     const isCorrectPw = await bcrypt.compare(plainPw, user.password);
-
     if (!isCorrectPw) throw new UnauthorizedException('Password incorrect');
 
     // get token generator by curried function
