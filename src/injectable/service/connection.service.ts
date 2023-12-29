@@ -31,8 +31,9 @@ export class ConnectionService implements OnModuleInit, OnModuleDestroy {
   }
 
   public async registerClient(userId: number, socketId: string) {
+    const oldClient = await this.channels.get(userId.toString());
     const rst = await this.clients.set(userId.toString(), socketId);
-    return rst === 'OK';
+    return { success: rst === 'OK', oldClient };
   }
 
   public async deregisterClient(userId: number) {

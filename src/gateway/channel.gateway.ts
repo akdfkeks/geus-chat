@@ -26,7 +26,9 @@ export class ChannelGateway implements OnGatewayInit {
 
   public async handleConnection(client: Socket) {}
 
-  public async handleDisconnect(client: Socket) {}
+  public async handleDisconnect(client: Socket) {
+    return await this.channelService.handleDisconnect(client);
+  }
 
   @SubscribeMessage('message')
   public async onMessage(@ConnectedSocket() client: Socket, @MessageBody() message: any): Promise<void> {

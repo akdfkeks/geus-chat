@@ -43,12 +43,16 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
         return await this.sendMessage(server, client, message);
       }
       case RecvOP.IDENTIFY: {
-        return await this.identifyClient(client, message);
+        return await this.identifyClient(server, client, message);
       }
       default:
         console.log(message);
         return;
     }
+  }
+
+  public async handleDisconnect(client: Socket) {
+    await this.connectionService.deregisterClient(client.data.user.id);
   }
 
   /**
@@ -76,10 +80,14 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
     return await this.dispatch(server, client, msg);
   }
 
-  public async identifyClient(client: Socket, message: Message) {
+  public async identifyClient(server: Server, client: Socket, message: Message) {
     typia.assertEquals<Message<RecvPayload.Identify>>(message);
 
     const { id: userId } = this.authService.verifyAccessToken(message.d.accessToken);
+
+    const regRst = await this.connectionService.registerClient(userId, client.id);
+    if (regRst.oldClient) await this.disconnectOldClient(server, regRst.oldClient);
+
     await this.initializeClient(client, userId);
     const msg: Message = {
       op: SendOP.HELLO,
@@ -177,5 +185,18 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
     }
 
     return result;
+  }
+
+  private async disconnectOldClient(server: Server, socketId: string) {
+    const oldClient = (await server.in(socketId).fetchSockets())[0];
+    const error: Message = {
+      op: SendOP.ERROR,
+      d: {
+        code: 4000,
+        message: '새로운 클라이언트로 접속하여 기존 연결을 종료합니다.',
+      },
+    };
+    oldClient?.emit('message', error);
+    oldClient?.disconnect();
   }
 }
