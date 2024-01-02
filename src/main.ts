@@ -10,7 +10,7 @@ async function bootstrap() {
   app.useWebSocketAdapter(new RedisIoAdapter(app));
 
   const configService = app.get(ConfigService);
-  await app.listen(configService.get('NODE_PORT') || 3000);
+  await app.listen(configService.get('NODE_PORT') || 3000, '0.0.0.0');
 
   app.enableShutdownHooks();
 }
