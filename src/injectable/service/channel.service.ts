@@ -13,6 +13,7 @@ import { PrismaService } from './prisma.service';
 import { ChannelMemberRepository } from 'src/injectable/repository/channel-member.repository';
 import { JWTPayload } from 'src/common/structure/Auth';
 import { Client } from 'src/common/structure/Client';
+import { IChannelIdParam } from 'src/common/structure/Channel';
 
 @Injectable()
 export class ChannelService implements OnModuleInit, OnModuleDestroy {
@@ -120,11 +121,12 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
 
   /**
    * @description 채널 소속 멤버를 조회합니다.
-   * @param {string} channelId 조회할 채널의 ID
+   * @param {string} param
    * @returns {Array<User>} 멤버 목록
    */
-  public async getChannelMembers(channelId: string) {
-    return this.memberRepository.findChannelMembers(channelId);
+  public async getChannelMembers(param: IChannelIdParam) {
+    typia.assertEquals<IChannelIdParam>(param);
+    return this.memberRepository.findChannelMembers(param.channelId);
   }
 
   private async checkMessagePermission(client: Socket, message: Message) {
@@ -165,9 +167,10 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
     return this.channelRepository.getJoinedChannelListByUserId(user.id);
   }
 
-  public async addMemberToChannel(user: JWTPayload, channelId: string) {
-    await this.checkChannelExists(channelId);
-    const result = await this.channelRepository.addMemberToChannel(user.id, channelId);
+  public async addMemberToChannel(user: JWTPayload, param: IChannelIdParam) {
+    typia.assertEquals<IChannelIdParam>(param);
+    await this.checkChannelExists(param.channelId);
+    const result = await this.channelRepository.addMemberToChannel(user.id, param.channelId);
 
     const clientId = await this.connectionService.getClientId(user.id);
     // if client is online
@@ -180,7 +183,7 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
           members: false,
         },
       };
-      client.join(channelId);
+      client.join(param.channelId);
       client.emit('message', newChannel);
     }
 

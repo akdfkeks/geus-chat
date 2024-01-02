@@ -2,6 +2,7 @@ import { Body, Controller, Delete, Get, HttpCode, Param, Post, Query, UseFilters
 import { ReqUser } from 'src/common/decorator/user';
 import { UserGuard } from 'src/common/guard/jwt.guard';
 import { JWTPayload } from 'src/common/structure/Auth';
+import { IChannelIdParam } from 'src/common/structure/Channel';
 import { ChannelService } from 'src/injectable/service/channel.service';
 
 @UseFilters()
@@ -28,14 +29,14 @@ export class ChannelController {
    * Dev Only
    */
   @Get('/:channelId/join')
-  public async onChannelJoinRequest(@ReqUser() user: JWTPayload, @Param('channelId') channelId: string) {
-    const result = await this.channelService.addMemberToChannel(user, channelId);
+  public async onChannelJoinRequest(@ReqUser() user: JWTPayload, @Param() param: any) {
+    const result = await this.channelService.addMemberToChannel(user, param);
     return result;
   }
 
   @Get('/:channelId/member')
-  public async onChannelMemberListRequest(@Param('channelId') channelId: string) {
-    const result = await this.channelService.getChannelMembers(channelId);
+  public async onChannelMemberListRequest(@Param() param: any) {
+    const result = await this.channelService.getChannelMembers(param);
     return { members: result };
   }
 
