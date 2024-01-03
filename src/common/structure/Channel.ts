@@ -5,5 +5,5 @@ export interface IChannelIdParam {
 }
 
 export interface ICreateChannelDto {
-  channelName: string & tags.MaxLength<1> & tags.MaxLength<30>;
+  channelName: string & tags.MinLength<1> & tags.MaxLength<30>;
 }
