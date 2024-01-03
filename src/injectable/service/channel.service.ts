@@ -13,7 +13,7 @@ import { PrismaService } from './prisma.service';
 import { ChannelMemberRepository } from 'src/injectable/repository/channel-member.repository';
 import { JWTPayload } from 'src/common/structure/Auth';
 import { Client } from 'src/common/structure/Client';
-import { IChannelIdParam } from 'src/common/structure/Channel';
+import { IChannelIdParam, ICreateChannelDto } from 'src/common/structure/Channel';
 
 @Injectable()
 export class ChannelService implements OnModuleInit, OnModuleDestroy {
@@ -158,7 +158,8 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
     return true;
   }
 
-  public async createChannel(user: JWTPayload, dto: any) {
+  public async createChannel(user: JWTPayload, dto: ICreateChannelDto) {
+    typia.assertEquals<ICreateChannelDto>(dto);
     const channel = await this.channelRepository.createChannel(user.id, dto.channelName);
     return channel.id;
   }
