@@ -1,5 +1,5 @@
 import { Body, Controller, Get, HttpCode, Param, Post, Query, UseFilters, UseGuards } from '@nestjs/common';
-import { AuthService } from 'src/injectable/service/auth.service';
+import { AuthService } from 'src/service/auth.service';
 import typia from 'typia';
 
 @Controller('/v1/auth')

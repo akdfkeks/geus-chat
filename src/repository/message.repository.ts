@@ -1,7 +1,7 @@
 import { OnModuleInit } from '@nestjs/common';
 import { mapping } from 'cassandra-driver';
 import { MessageModel } from 'src/model/messageLog.model';
-import { CassandraService } from 'src/injectable/service/cassandra.service';
+import { CassandraService } from 'src/service/cassandra.service';
 
 export class MessageRepository implements OnModuleInit {
   private messageLogMapper: mapping.ModelMapper<MessageModel>;

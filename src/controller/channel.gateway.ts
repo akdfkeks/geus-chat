@@ -10,7 +10,7 @@ import {
 import { Server, Socket } from 'socket.io';
 import { GwBadRequestFilter } from 'src/filter/v2/GwBadRequest.filter';
 import { GwExceptionFilter } from 'src/filter/v2/GwException.filter';
-import { ChannelService } from 'src/injectable/service/channel.service';
+import { ChannelService } from 'src/service/channel.service';
 
 @UseFilters(new GwExceptionFilter(), new GwBadRequestFilter())
 @WebSocketGateway({ namespace: 'v2/chat', cors: { origin: '*' } })

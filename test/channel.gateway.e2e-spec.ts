@@ -6,7 +6,7 @@ import { RecvOP, SendOP } from 'src/common/structure/Message';
 import { RedisIoAdapter } from 'src/adapter/redis.adapter';
 import { ConfigService } from '@nestjs/config';
 import { RecvPayload, Message } from 'src/common/structure/Message';
-import { AuthService } from 'src/injectable/service/auth.service';
+import { AuthService } from 'src/service/auth.service';
 import * as error from 'src/common/structure/Exception';
 import * as request from 'supertest';
 import { log } from 'console';

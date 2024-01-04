@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { WsException } from '@nestjs/websockets';
 import { ERROR } from 'src/common/error/error';
-import { UserRepository } from 'src/injectable/repository/user.repository';
+import { UserRepository } from 'src/repository/user.repository';
 import * as bcrypt from 'bcrypt';
 import { JWTHelper } from 'src/util/jwt.helper';
 import { JWTPayload } from 'src/common/structure/Auth';

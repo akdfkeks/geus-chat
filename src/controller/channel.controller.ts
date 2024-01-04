@@ -3,7 +3,7 @@ import { ReqUser } from 'src/common/decorator/user';
 import { UserGuard } from 'src/common/guard/jwt.guard';
 import { JWTPayload } from 'src/common/structure/Auth';
 import { IChannelIdParam } from 'src/common/structure/Channel';
-import { ChannelService } from 'src/injectable/service/channel.service';
+import { ChannelService } from 'src/service/channel.service';
 
 @UseFilters()
 @UseGuards(UserGuard)

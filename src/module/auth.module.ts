@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { UserService } from 'src/injectable/service/user.service';
-import { AuthService } from 'src/injectable/service/auth.service';
+import { UserService } from 'src/service/user.service';
+import { AuthService } from 'src/service/auth.service';
 import { AuthController } from 'src/controller/auth.controller';
-import { UserRepository } from 'src/injectable/repository/user.repository';
+import { UserRepository } from 'src/repository/user.repository';
 
 @Module({
   imports: [],

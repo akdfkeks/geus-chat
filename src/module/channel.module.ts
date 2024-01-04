@@ -1,14 +1,14 @@
 import { Module } from '@nestjs/common';
-import { CassandraService } from 'src/injectable/service/cassandra.service';
-import { ChannelService } from 'src/injectable/service/channel.service';
-import { SocketService } from 'src/injectable/service/socket.service';
-import { UserService } from 'src/injectable/service/user.service';
-import { AuthService } from 'src/injectable/service/auth.service';
-import { UserRepository } from 'src/injectable/repository/user.repository';
-import { ConnectionService } from 'src/injectable/service/connection.service';
-import { ChannelRepository } from 'src/injectable/repository/channel.repository';
-import { ChannelGateway } from 'src/gateway/channel.gateway';
-import { ChannelMemberRepository } from 'src/injectable/repository/channel-member.repository';
+import { CassandraService } from 'src/service/cassandra.service';
+import { ChannelService } from 'src/service/channel.service';
+import { SocketService } from 'src/service/socket.service';
+import { UserService } from 'src/service/user.service';
+import { AuthService } from 'src/service/auth.service';
+import { UserRepository } from 'src/repository/user.repository';
+import { ConnectionService } from 'src/service/connection.service';
+import { ChannelRepository } from 'src/repository/channel.repository';
+import { ChannelGateway } from 'src/controller/channel.gateway';
+import { ChannelMemberRepository } from 'src/repository/channel-member.repository';
 import { ChannelController } from 'src/controller/channel.controller';
 
 @Module({
