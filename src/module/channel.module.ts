@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { CassandraService } from 'src/service/cassandra.service';
 import { ChannelService } from 'src/service/channel.service';
 import { SocketService } from 'src/service/socket.service';
 import { UserService } from 'src/service/user.service';
@@ -10,14 +9,14 @@ import { ChannelRepository } from 'src/repository/channel.repository';
 import { ChannelGateway } from 'src/controller/channel.gateway';
 import { ChannelMemberRepository } from 'src/repository/channel-member.repository';
 import { ChannelController } from 'src/controller/channel.controller';
+import { MongoModule } from './mongo.module';
 
 @Module({
-  imports: [],
+  imports: [MongoModule],
   controllers: [ChannelController],
   providers: [
     ChannelGateway,
     SocketService,
-    CassandraService,
     ChannelService,
     UserService,
     AuthService,
@@ -26,6 +25,6 @@ import { ChannelController } from 'src/controller/channel.controller';
     ChannelRepository,
     ChannelMemberRepository,
   ],
-  exports: [CassandraService],
+  exports: [],
 })
 export class ChannelModule {}

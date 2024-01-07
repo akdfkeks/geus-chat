@@ -1,4 +1,4 @@
-import { Injectable, OnModuleInit, OnModuleDestroy, UseFilters } from '@nestjs/common';
+import { Injectable, OnModuleInit, OnModuleDestroy, UseFilters, Inject } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { GatewayException } from 'src/common/structure/Exception';
 import * as error from 'src/common/structure/Exception';
@@ -14,6 +14,8 @@ import { ChannelMemberRepository } from 'src/repository/channel-member.repositor
 import { JWTPayload } from 'src/common/structure/Auth';
 import { Client } from 'src/common/structure/Client';
 import { IChannelIdParam, ICreateChannelDto } from 'src/common/structure/Channel';
+import { MESSAGE_HISTORY, MONGODB_CONNECTION } from 'src/common/constant/database';
+import { Db as MongoDatabase } from 'mongodb';
 
 @Injectable()
 export class ChannelService implements OnModuleInit, OnModuleDestroy {
@@ -26,6 +28,7 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
     private readonly channelRepository: ChannelRepository,
     private readonly connectionService: ConnectionService,
     private readonly memberRepository: ChannelMemberRepository,
+    @Inject(MONGODB_CONNECTION) private readonly mongo: MongoDatabase,
   ) {}
 
   public async onModuleInit() {}
@@ -116,7 +119,7 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
 
     server.to(message.d.channelId).emit('message', message);
 
-    return await this.saveMessage(message);
+    return await this.saveMessage(message.d);
   }
 
   /**
@@ -135,8 +138,12 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-  private async saveMessage(message: Message) {
-    // 바로 저장 vs MQ 에 넘기기
+  private async saveMessage(message: any) {
+    try {
+      await this.mongo.collection(MESSAGE_HISTORY).insertOne(message);
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   private initClientIdentifier(client: Socket, data: Client.InitPayload) {

@@ -4,9 +4,10 @@ import { ChannelModule } from 'src/module/channel.module';
 import { CacheModule } from './module/cache.module';
 import { AuthModule } from './module/auth.module';
 import { PrismaModule } from './module/prisma.module';
+import { MongoModule } from './module/mongo.module';
 
 @Module({
-  imports: [EnvConfigModule, ChannelModule, CacheModule, AuthModule, PrismaModule],
+  imports: [EnvConfigModule, ChannelModule, CacheModule, AuthModule, PrismaModule, MongoModule],
   controllers: [],
   providers: [],
   exports: [],
