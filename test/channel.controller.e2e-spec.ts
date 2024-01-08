@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { TestingModule, Test } from '@nestjs/testing';
 import { log } from 'console';
 import { Socket } from 'socket.io';
-import { AppModule } from 'src/app.module';
+import { AppModule } from 'src/module/app.module';
 import * as request from 'supertest';
 
 describe('[Http] ChannelController (e2e)', () => {

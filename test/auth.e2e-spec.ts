@@ -2,8 +2,8 @@ import { INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TestingModule, Test } from '@nestjs/testing';
 import { log } from 'console';
-import { RedisIoAdapter } from 'src/adapter/redis.adapter';
-import { AppModule } from 'src/app.module';
+import { RedisIoAdapter } from 'src/common/adapter/redis.adapter';
+import { AppModule } from 'src/module/app.module';
 import * as request from 'supertest';
 
 describe('AuthController (e2e)', () => {

@@ -1,9 +1,9 @@
 import { Injectable, OnModuleInit, OnModuleDestroy, UseFilters, Inject } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
-import { GatewayException } from 'src/common/structure/Exception';
-import * as error from 'src/common/structure/Exception';
-import { RecvOP, SendOP, SendPayload } from 'src/common/structure/Message';
-import { RecvPayload, Message } from 'src/common/structure/Message';
+import { GatewayException } from 'src/structure/dto/Exception';
+import * as error from 'src/structure/dto/Exception';
+import { RecvOP, SendOP, SendPayload } from 'src/structure/dto/Message';
+import { RecvPayload, Message } from 'src/structure/dto/Message';
 import { UserService } from './user.service';
 import { AuthService } from './auth.service';
 import typia from 'typia';
@@ -11,9 +11,9 @@ import { ChannelRepository } from 'src/repository/channel.repository';
 import { ConnectionService } from './connection.service';
 import { PrismaService } from './prisma.service';
 import { ChannelMemberRepository } from 'src/repository/channel-member.repository';
-import { JWTPayload } from 'src/common/structure/Auth';
-import { Client } from 'src/common/structure/Client';
-import { IChannelIdParam, ICreateChannelDto } from 'src/common/structure/Channel';
+import { JWTPayload } from 'src/structure/dto/Auth';
+import { Client } from 'src/structure/dto/Client';
+import { IChannelIdParam, ICreateChannelDto } from 'src/structure/dto/Channel';
 import { MESSAGE_HISTORY, MONGODB_CONNECTION } from 'src/common/constant/database';
 import { Db as MongoDatabase } from 'mongodb';
 

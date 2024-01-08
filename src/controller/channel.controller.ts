@@ -1,8 +1,8 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, Post, Query, UseFilters, UseGuards } from '@nestjs/common';
 import { ReqUser } from 'src/common/decorator/user';
 import { UserGuard } from 'src/common/guard/jwt.guard';
-import { JWTPayload } from 'src/common/structure/Auth';
-import { IChannelIdParam } from 'src/common/structure/Channel';
+import { JWTPayload } from 'src/structure/dto/Auth';
+import { IChannelIdParam } from 'src/structure/dto/Channel';
 import { ChannelService } from 'src/service/channel.service';
 
 @UseFilters()

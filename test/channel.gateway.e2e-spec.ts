@@ -1,13 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import { AppModule } from '../src/app.module';
+import { AppModule } from '../src/module/app.module';
 import { Socket, io } from 'socket.io-client';
-import { RecvOP, SendOP } from 'src/common/structure/Message';
-import { RedisIoAdapter } from 'src/adapter/redis.adapter';
+import { RecvOP, SendOP } from 'src/structure/dto/Message';
+import { RedisIoAdapter } from 'src/common/adapter/redis.adapter';
 import { ConfigService } from '@nestjs/config';
-import { RecvPayload, Message } from 'src/common/structure/Message';
+import { RecvPayload, Message } from 'src/structure/dto/Message';
 import { AuthService } from 'src/service/auth.service';
-import * as error from 'src/common/structure/Exception';
+import * as error from 'src/structure/dto/Exception';
 import * as request from 'supertest';
 import { log } from 'console';
 import { ulid } from 'ulidx';

@@ -3,10 +3,10 @@ import { WsException } from '@nestjs/websockets';
 import { ERROR } from 'src/common/error/error';
 import { UserRepository } from 'src/repository/user.repository';
 import * as bcrypt from 'bcrypt';
-import { JWTHelper } from 'src/util/jwt.helper';
-import { JWTPayload } from 'src/common/structure/Auth';
-import { GatewayException } from 'src/common/structure/Exception';
-import * as error from 'src/common/structure/Exception';
+import { JWTHelper } from 'src/common/util/jwt.helper';
+import { JWTPayload } from 'src/structure/dto/Auth';
+import { GatewayException } from 'src/structure/dto/Exception';
+import * as error from 'src/structure/dto/Exception';
 import { JWT_ACCESS_SECRET, JWT_REFRESH_SECRET } from 'src/common/guard/jwt.guard';
 
 @Injectable()

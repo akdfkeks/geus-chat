@@ -1,5 +1,5 @@
 import { Injectable, CanActivate, ExecutionContext, BadRequestException } from '@nestjs/common';
-import { JWTHelper } from 'src/util/jwt.helper';
+import { JWTHelper } from 'src/common/util/jwt.helper';
 
 @Injectable()
 export class UserGuard implements CanActivate {

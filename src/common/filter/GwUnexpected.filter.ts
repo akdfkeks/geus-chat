@@ -2,8 +2,8 @@ import { ArgumentsHost, Catch } from '@nestjs/common';
 import { BaseWsExceptionFilter, WsException } from '@nestjs/websockets';
 import { log } from 'console';
 import { Socket } from 'socket.io';
-import { GatewayException } from 'src/common/structure/Exception';
-import { Message, SendOP } from 'src/common/structure/Message';
+import { GatewayException } from 'src/structure/dto/Exception';
+import { Message, SendOP } from 'src/structure/dto/Message';
 
 @Catch()
 export class GwUnexpectExceptionFilter extends BaseWsExceptionFilter {

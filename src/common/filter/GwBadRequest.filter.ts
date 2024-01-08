@@ -1,7 +1,7 @@
 import { ArgumentsHost, Catch } from '@nestjs/common';
 import { BaseWsExceptionFilter } from '@nestjs/websockets';
 import { log } from 'console';
-import { GatewayException, INVALID_FORMAT } from 'src/common/structure/Exception';
+import { GatewayException, INVALID_FORMAT } from 'src/structure/dto/Exception';
 import { TypeGuardError } from 'typia';
 
 @Catch(TypeGuardError)

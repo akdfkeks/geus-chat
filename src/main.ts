@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { RedisIoAdapter } from 'src/adapter/redis.adapter';
+import { AppModule } from './module/app.module';
+import { RedisIoAdapter } from 'src/common/adapter/redis.adapter';
 import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {

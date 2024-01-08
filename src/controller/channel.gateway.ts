@@ -8,8 +8,8 @@ import {
   OnGatewayInit,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { GwBadRequestFilter } from 'src/filter/v2/GwBadRequest.filter';
-import { GwExceptionFilter } from 'src/filter/v2/GwException.filter';
+import { GwBadRequestFilter } from 'src/common/filter/GwBadRequest.filter';
+import { GwExceptionFilter } from 'src/common/filter/GwException.filter';
 import { ChannelService } from 'src/service/channel.service';
 
 @UseFilters(new GwExceptionFilter(), new GwBadRequestFilter())
