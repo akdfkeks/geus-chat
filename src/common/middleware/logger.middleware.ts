@@ -9,10 +9,9 @@ export class LoggerContextMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction) {
     const { ip, method, originalUrl, headers } = req;
     const userAgent = req.get('user-agent');
-    const datetime = new Date();
     res.on('finish', () => {
       const { statusCode } = res;
-      this.logger.warn(`${datetime} USER-${0} ${method} ${originalUrl} ${statusCode} ${ip} ${userAgent}`);
+      this.logger.log(` USER-${0} ${method} ${originalUrl} ${statusCode} ${ip} ${userAgent}`);
     });
 
     next();
