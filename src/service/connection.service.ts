@@ -13,11 +13,14 @@ export class ConnectionService implements OnModuleInit, OnModuleDestroy {
     private readonly clients: Redis,
   ) {}
 
-  async onModuleInit() {}
+  async onModuleInit() {
+    await Promise.all([this.channels.connect(), this.clients.connect()]);
+  }
 
   async onModuleDestroy() {
-    await this.channels.reset();
-    await this.clients.reset();
+    await Promise.all([this.channels.reset(), this.clients.reset()]);
+    this.channels.disconnect();
+    this.clients.disconnect();
   }
 
   public async cacheChannels(channel: string | string[]) {
@@ -32,11 +35,12 @@ export class ConnectionService implements OnModuleInit, OnModuleDestroy {
 
   public async registerClient(userId: number, socketId: string) {
     const oldClient = await this.channels.get(userId.toString());
-    const rst = await this.clients.set(userId.toString(), socketId);
-    return { success: rst === 'OK', oldClient };
+    if (oldClient !== socketId) await this.clients.set(userId.toString(), socketId);
+    return { success: 'OK', oldClient };
   }
 
   public async deregisterClient(userId: number) {
+    if (!userId) return;
     const rst = await this.clients.del(userId.toString());
     return rst >= 1;
   }

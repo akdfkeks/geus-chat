@@ -5,11 +5,13 @@ export const CacheModule = RedisModule.forRoot({
       host: 'localhost',
       port: 6379,
       namespace: 'message_channel_list',
+      lazyConnect: true,
     },
     {
       host: 'localhost',
       port: 6379,
       namespace: 'socket_user_map',
+      lazyConnect: true,
     },
   ],
 });
