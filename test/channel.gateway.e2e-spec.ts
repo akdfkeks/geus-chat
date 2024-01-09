@@ -89,6 +89,22 @@ describe('[Socket] ChannelGateway (e2e)', () => {
         .then(({ body }) => body.accessToken);
     });
 
+    it('잘못된 인증 형식을 전송하면 에러를 반환합니다.', async () => {
+      const identify: Message = {
+        op: RecvOP.IDENTIFY,
+        d: { accessToken, unknownField: 'lololo' },
+      };
+
+      return new Promise<void>((res, rej) => {
+        client.send(identify);
+        client.on('message', (data) => {
+          if (data.op !== SendOP.ERROR) return;
+          expect(data.d.code).toBe(error.INVALID_FORMAT.code);
+          res();
+        });
+      });
+    });
+
     it('인증에 성공하면 참여중인 채널 정보를 수신합니다.', async () => {
       const identify: Message<RecvPayload.Identify> = {
         op: RecvOP.IDENTIFY,
@@ -116,7 +132,7 @@ describe('[Socket] ChannelGateway (e2e)', () => {
       };
       const receiverIdentify: Message<RecvPayload.Identify> = {
         op: RecvOP.IDENTIFY,
-        d: { accessToken: senderAccess },
+        d: { accessToken: receiverAccess },
       };
 
       return await Promise.all([
