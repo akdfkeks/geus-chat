@@ -1,4 +1,4 @@
-import { Injectable, OnModuleInit, OnModuleDestroy, UseFilters, Inject } from '@nestjs/common';
+import { Injectable, OnModuleInit, OnModuleDestroy, UseFilters, Inject, LoggerService } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { GatewayException } from 'src/structure/dto/Exception';
 import * as error from 'src/structure/dto/Exception';
@@ -16,6 +16,7 @@ import { Client } from 'src/structure/dto/Client';
 import { IChannelIdParam, ICreateChannelDto } from 'src/structure/dto/Channel';
 import { MESSAGE_HISTORY, MONGODB_CONNECTION } from 'src/common/constant/database';
 import { Db as MongoDatabase } from 'mongodb';
+import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
 @Injectable()
 export class ChannelService implements OnModuleInit, OnModuleDestroy {
@@ -29,6 +30,7 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
     private readonly connectionService: ConnectionService,
     private readonly memberRepository: ChannelMemberRepository,
     @Inject(MONGODB_CONNECTION) private readonly mongo: MongoDatabase,
+    @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: LoggerService,
   ) {}
 
   public async onModuleInit() {}
@@ -50,13 +52,13 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
         return await this.identifyClient(server, client, message);
       }
       default:
-        console.log(message);
+        this.logger.warn(message);
         return;
     }
   }
 
   public async handleDisconnect(client: Socket) {
-    await this.connectionService.deregisterClient(client.data.user.id);
+    await this.connectionService.deregisterClient(client.data.user?.id);
   }
 
   /**
@@ -85,6 +87,8 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
   }
 
   public async identifyClient(server: Server, client: Socket, message: Message) {
+    if (client.data.user) return; // Already identified
+
     typia.assertEquals<Message<RecvPayload.Identify>>(message);
 
     const { id: userId } = this.authService.verifyAccessToken(message.d.accessToken);
