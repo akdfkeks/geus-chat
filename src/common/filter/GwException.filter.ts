@@ -5,9 +5,9 @@ import { Socket } from 'socket.io';
 import { GatewayException } from 'src/structure/dto/Exception';
 import { Message, SendOP } from 'src/structure/dto/Message';
 
-@Catch(GatewayException, WsException, Error)
+@Catch()
 export class GwExceptionFilter extends BaseWsExceptionFilter {
-  catch(exception: GatewayException, host: ArgumentsHost) {
+  catch(exception: any, host: ArgumentsHost) {
     const clientSocket = host.switchToWs().getClient<Socket>();
     clientSocket.send({
       op: SendOP.ERROR,
