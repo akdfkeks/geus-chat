@@ -3,9 +3,9 @@ import { log } from 'console';
 
 export namespace GatewayException {
   export interface Args {
-    code?: number;
-    message?: string;
-    disconnect?: boolean;
+    code: number;
+    message: string;
+    disconnect: boolean;
   }
 }
 
@@ -14,9 +14,10 @@ export class GatewayException extends WsException {
   public disconnect: boolean;
 
   constructor(args: GatewayException.Args) {
-    super(args.message || 'Internal server error');
-    this.code = args.code || 5000;
-    this.disconnect = args.disconnect || false;
+    super(args.message);
+    this.message = args.message;
+    this.code = args.code;
+    this.disconnect = args.disconnect;
   }
 
   public print() {
@@ -64,7 +65,7 @@ export const UNKNOWN_AUTH_ERROR: GatewayException.Args = {
 
 export const NO_PERMISSION: GatewayException.Args = {
   code: 4030,
-  message: '',
+  message: 'No permission',
   disconnect: false,
 };
 
