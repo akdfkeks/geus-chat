@@ -64,7 +64,8 @@ describe('[Http] ChannelController (e2e)', () => {
           channelName: '채널 참여 테스트용',
         })
         .then(({ body }) => body.channelId);
-      newMemeberAccess = accessToken = await request(app.getHttpServer())
+
+      newMemeberAccess = await request(app.getHttpServer())
         .post('/v1/auth/login')
         .send({
           email: 'bob@example.com',
