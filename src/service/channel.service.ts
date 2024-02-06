@@ -2,7 +2,7 @@ import { Injectable, OnModuleInit, OnModuleDestroy, UseFilters, Inject, LoggerSe
 import { Server, Socket } from 'socket.io';
 import { GatewayException } from 'src/structure/dto/Exception';
 import * as error from 'src/structure/dto/Exception';
-import { RecvOP, SendOP, SendPayload } from 'src/structure/dto/Message';
+import { MessageType, RecvOP, SendOP, SendPayload } from 'src/structure/dto/Message';
 import { RecvPayload, Message } from 'src/structure/dto/Message';
 import { UserService } from './user.service';
 import { AuthService } from './auth.service';
@@ -14,9 +14,10 @@ import { ChannelMemberRepository } from 'src/repository/channel-member.repositor
 import { JWTPayload } from 'src/structure/dto/Auth';
 import { Client } from 'src/structure/dto/Client';
 import { IChannelIdParam, ICreateChannelDto } from 'src/structure/dto/Channel';
-import { MESSAGE_HISTORY, MONGODB_CONNECTION } from 'src/common/constant/database';
-import { Db as MongoDatabase } from 'mongodb';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
+import { MessageHistoryRepository } from 'src/repository/message-history.repository';
+import { SnowFlake } from 'src/common/util/snowflake';
+import { BigIntegerUtil } from 'src/common/util/bInteger.util';
 
 @Injectable()
 export class ChannelService implements OnModuleInit, OnModuleDestroy {
@@ -29,7 +30,7 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
     private readonly channelRepository: ChannelRepository,
     private readonly connectionService: ConnectionService,
     private readonly memberRepository: ChannelMemberRepository,
-    @Inject(MONGODB_CONNECTION) private readonly mongo: MongoDatabase,
+    private readonly messageRepository: MessageHistoryRepository,
     @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: LoggerService,
   ) {}
 
@@ -44,6 +45,7 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
    * @returns
    */
   public async handleMessage(server: Server, client: Socket, message: Message) {
+    this.logger.log(message);
     switch (message.op) {
       case RecvOP.SEND_MESSAGE: {
         return await this.sendMessage(server, client, message);
@@ -58,7 +60,7 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
   }
 
   public async handleDisconnect(client: Socket) {
-    await this.connectionService.deregisterClient(client.data.user?.id);
+    await this.connectionService.deregisterClient(client);
   }
 
   /**
@@ -69,17 +71,22 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
    * @throws {GatewayException, TypeGuardError}
    */
   public async sendMessage(server: Server, client: Socket, message: Message<RecvPayload.Text>) {
-    this.isClientIdentified(client);
+    if (!this.isClientIdentified(client)) {
+      throw new GatewayException(error.CLIENT_NOT_IDENTIFIED);
+    }
 
+    // Message validation
     typia.assertEquals<Message<RecvPayload.Text>>(message);
 
-    const msg: Message = {
+    const msg: Message<SendPayload.Text> = {
       op: SendOP.DISPATCH_MESSAGE,
       d: {
-        channelId: message.d.channelId,
-        message: message.d.message,
-        timestamp: Date.now(),
-        sender: client.data.user,
+        cid: message.d.cid,
+        mid: SnowFlake.generate(),
+        mtype: MessageType.TEXT,
+        data: message.d.data,
+        uid: client.data.uid,
+        uname: client.data.uname,
       },
     };
 
@@ -87,11 +94,11 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
   }
 
   public async identifyClient(server: Server, client: Socket, message: Message) {
-    if (client.data.user) return; // Already identified
+    if (client.data.uid) return; // Already identified
 
     typia.assertEquals<Message<RecvPayload.Identify>>(message);
 
-    const { id: userId } = this.authService.verifyAccessToken(message.d.accessToken);
+    const { id: userId } = this.authService.verifyAccessToken(message.d.token);
 
     const regRst = await this.connectionService.registerClient(userId, client.id);
     if (regRst.oldClient) await this.disconnectOldClient(server, regRst.oldClient);
@@ -100,7 +107,7 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
     const msg: Message = {
       op: SendOP.HELLO,
       d: {
-        userId,
+        uid: userId,
         channels: [...client.rooms].slice(1), // Client ID 제외
       },
     };
@@ -108,11 +115,12 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
   }
 
   private async initializeClient(client: Socket, userId: number) {
-    const { nickname, socialType } = await this.userService.getUserNickAndTypeByUserId(userId);
-    const ids = await this.channelRepository.getJoinedChannelsIdByUserId(userId);
-    this.initClientIdentifier(client, { id: userId, nickname, socialType });
+    const { nickname } = await this.userService.getUserNickAndTypeByUserId(userId);
+    const channels = await this.channelRepository.getJoinedChannelsIdByUserId(userId);
 
-    await client.join(ids);
+    client.data = { uid: userId, uname: nickname };
+
+    await client.join(channels);
 
     return;
   }
@@ -120,10 +128,10 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
   private async dispatch(server: Server, client: Socket, message: Message) {
     // await this.checkChannelExists(message.d.channelId); 채널이 존재하는지 꼭 확인해야할까?
     await this.checkMessagePermission(client, message);
+    await this.messageRepository.saveMessage({ ...message.d });
 
-    server.to(message.d.channelId).emit('message', message);
-
-    return await this.saveMessage(message.d);
+    server.to(message.d.cid).emit('message', BigIntegerUtil.stringifyBigInt(message));
+    return;
   }
 
   /**
@@ -137,25 +145,13 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
   }
 
   private async checkMessagePermission(client: Socket, message: Message) {
-    if (!client.rooms.has(message.d.channelId)) {
+    if (!client.rooms.has(message.d.cid)) {
       throw new GatewayException(error.NO_PERMISSION);
     }
   }
 
-  private async saveMessage(message: any) {
-    try {
-      await this.mongo.collection(MESSAGE_HISTORY).insertOne(message);
-    } catch (e) {
-      console.log(e);
-    }
-  }
-
-  private initClientIdentifier(client: Socket, data: Client.InitPayload) {
-    client.data.user = data;
-  }
-
   private isClientIdentified(client: Socket) {
-    if (!client.data.user) throw new GatewayException(error.CLIENT_NOT_IDENTIFIED);
+    return client.data.uid !== undefined || client.data.uid !== null;
   }
 
   public async checkChannelExists(channelId: string) {
@@ -186,18 +182,18 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
 
     const clientId = await this.connectionService.getClientId(user.id);
     // if client is online
-    if (clientId) {
-      const client = (await this.server.in(clientId).fetchSockets())[0];
-      const newChannel: Message<SendPayload.UpdateChannel> = {
-        op: SendOP.UPDATE_CHANNEL,
-        d: {
-          channelId: result.channelId,
-          members: false,
-        },
-      };
-      client.join(param.channelId);
-      client.emit('message', newChannel);
-    }
+    if (!clientId) return result;
+
+    const client = (await this.server.in(clientId).fetchSockets())[0];
+    const newChannel: Message<SendPayload.UpdateChannel> = {
+      op: SendOP.UPDATE_CHANNEL,
+      d: {
+        cid: result.channelId,
+        members: [],
+      },
+    };
+    client?.join(param.channelId);
+    client?.emit('message', newChannel);
 
     return result;
   }
@@ -208,7 +204,7 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
       op: SendOP.ERROR,
       d: {
         code: 4000,
-        message: '새로운 클라이언트로 접속하여 기존 연결을 종료합니다.',
+        message: '새로운 기기에서 접속하여 기존 연결을 종료합니다.',
       },
     };
     oldClient?.emit('message', error);
