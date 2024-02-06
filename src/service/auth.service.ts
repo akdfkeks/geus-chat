@@ -22,7 +22,7 @@ export class AuthService {
 
     // get token generator by curried function
     const tokenGenerator = JWTHelper.generate({ id: user.user_id });
-    const accessToken = tokenGenerator(JWT_ACCESS_SECRET)({ expiresIn: 100 });
+    const accessToken = tokenGenerator(JWT_ACCESS_SECRET)({ expiresIn: '1h' });
     const refreshToken = tokenGenerator(JWT_REFRESH_SECRET)({ expiresIn: '7d' });
 
     await this.userRepository.upsertChannelRefreshToken(user.user_id, refreshToken);
