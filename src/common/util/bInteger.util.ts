@@ -1,4 +1,6 @@
-export namespace IntegerUtil {
+// @ts-nocheck
+
+export namespace BigIntegerUtil {
   /**
    * 인자로 전달된 BigInt 형식의 값을 String으로 변환합니다.
    * 객체의 경우 재귀 탐색하며 변환을 수행합니다.
