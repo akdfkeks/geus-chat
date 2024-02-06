@@ -4,6 +4,6 @@ import { MESSAGE_HISTORY } from 'src/common/constant/database';
 import * as mongoose from 'mongoose';
 import { MessageSchema } from 'src/structure/model/message';
 
-export const MongoRootModule = MongooseModule.forRoot('mongodb://localhost/geus', {
+export const MongoModule = MongooseModule.forRoot('mongodb://localhost/geus', {
   autoCreate: true,
 });

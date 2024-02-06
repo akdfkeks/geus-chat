@@ -1,2 +1,3 @@
+export const MONGODB_DATABASE_NAME = 'geus';
 export const MONGODB_CONNECTION = 'MONGODB_CONNECTION';
 export const MESSAGE_HISTORY = 'MESSAGE_HISTORY';
