@@ -44,11 +44,11 @@ describe('[Socket] ChannelGateway (e2e)', () => {
   });
 
   beforeAll(async () => {
-    sender = io('http://' + NODE_HOST + ':' + NODE_PORT + '/v2/chat', {
+    sender = io('http://' + NODE_HOST + ':' + NODE_PORT + '/v2/channel', {
       autoConnect: true,
       forceNew: true,
     });
-    receiver = io('http://' + NODE_HOST + ':' + NODE_PORT + '/v2/chat', {
+    receiver = io('http://' + NODE_HOST + ':' + NODE_PORT + '/v2/channel', {
       autoConnect: true,
       forceNew: true,
     });
@@ -79,7 +79,7 @@ describe('[Socket] ChannelGateway (e2e)', () => {
     let accessToken: string;
 
     beforeAll(async () => {
-      client = io('http://' + NODE_HOST + ':' + NODE_PORT + '/v2/chat', {
+      client = io('http://' + NODE_HOST + ':' + NODE_PORT + '/v2/channel', {
         autoConnect: true,
         forceNew: true,
       });

@@ -13,7 +13,7 @@ import { GwExceptionFilter } from 'src/common/filter/GwException.filter';
 import { ChannelService } from 'src/service/channel.service';
 
 @UseFilters(new GwExceptionFilter(), new GwBadRequestFilter())
-@WebSocketGateway({ namespace: 'v2/chat', cors: { origin: '*' } })
+@WebSocketGateway({ namespace: 'v2/channel', cors: { origin: '*' } })
 export class ChannelGateway implements OnGatewayInit {
   @WebSocketServer()
   private server: Server;
