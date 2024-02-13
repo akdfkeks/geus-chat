@@ -24,6 +24,7 @@ import { MessageHistoryRepository } from 'src/repository/message-history.reposit
     UserRepository,
     ConnectionService,
     ChannelRepository,
+    UserRepository,
     ChannelMemberRepository,
     MessageHistoryRepository,
   ],
