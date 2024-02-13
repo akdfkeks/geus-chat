@@ -1,24 +1,13 @@
-import {
-  BadRequestException,
-  Body,
-  Controller,
-  Delete,
-  Get,
-  HttpCode,
-  Param,
-  Post,
-  Query,
-  UseFilters,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Post, Query, UseFilters, UseGuards } from '@nestjs/common';
 import { ReqUser } from 'src/common/decorator/user';
 import { UserGuard } from 'src/common/guard/jwt.guard';
 import { JWTPayload } from 'src/structure/dto/Auth';
 import { IChannelIdParam } from 'src/structure/dto/Channel';
 import { ChannelService } from 'src/service/channel.service';
 import { GlobalRequestFilter } from 'src/common/filter/GlobalRequest.filter';
+import { BadRequestFilter } from 'src/common/filter/BadRequest.filter';
 
-@UseFilters(GlobalRequestFilter, BadRequestException)
+@UseFilters(GlobalRequestFilter, BadRequestFilter)
 @UseGuards(UserGuard)
 @Controller('/v2/channel')
 export class ChannelController {
