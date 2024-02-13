@@ -65,12 +65,12 @@ export const UNKNOWN_AUTH_ERROR: GatewayException.Args = {
 
 export const NO_PERMISSION: GatewayException.Args = {
   code: 4030,
-  message: 'No permission',
+  message: '메세지를 전송할 권한이 없습니다.',
   disconnect: false,
 };
 
 export const CHANNEL_NOT_FOUND: GatewayException.Args = {
   code: 4041,
-  message: 'Channel not found',
+  message: '존재하지 않는 채널입니다.',
   disconnect: false,
 };

@@ -1,11 +1,10 @@
 import { InjectRedis } from '@liaoliaots/nestjs-redis';
-import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
-import { WsException } from '@nestjs/websockets';
+import { Injectable, OnApplicationShutdown, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { Socket } from 'socket.io';
 import Redis from 'ioredis';
-import { ERROR } from 'src/common/error/error';
 
 @Injectable()
-export class ConnectionService implements OnModuleInit, OnModuleDestroy {
+export class ConnectionService implements OnModuleInit, OnApplicationShutdown {
   constructor(
     @InjectRedis('message_channel_list')
     private readonly channels: Redis,
@@ -17,10 +16,14 @@ export class ConnectionService implements OnModuleInit, OnModuleDestroy {
     await Promise.all([this.channels.connect(), this.clients.connect()]);
   }
 
-  async onModuleDestroy() {
-    await Promise.all([this.channels.reset(), this.clients.reset()]);
-    this.channels.disconnect();
-    this.clients.disconnect();
+  async onApplicationShutdown() {
+    try {
+      await Promise.all([this.channels.reset(), this.clients.reset()]);
+      this.channels.disconnect();
+      this.clients.disconnect();
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   public async cacheChannels(channel: string | string[]) {
@@ -33,15 +36,15 @@ export class ConnectionService implements OnModuleInit, OnModuleDestroy {
     return (await this.channels.sismember('channels', channelId)) === 1; // 1 is true
   }
 
-  public async registerClient(userId: number, socketId: string) {
-    const oldClient = await this.channels.get(userId.toString());
-    if (oldClient !== socketId) await this.clients.set(userId.toString(), socketId);
-    return { success: 'OK', oldClient };
+  public async register(newClient: Socket, userId: number) {
+    const oldClientId = await this.channels.get(userId.toString());
+    if (oldClientId !== newClient.id) await this.clients.set(userId.toString(), newClient.id);
+    return oldClientId;
   }
 
-  public async deregisterClient(userId: number) {
-    if (!userId) return;
-    const rst = await this.clients.del(userId.toString());
+  public async deregister(client: Socket) {
+    if (!client.data.uid) return;
+    const rst = await this.clients.del(client.data.uid.toString());
     return rst >= 1;
   }
 

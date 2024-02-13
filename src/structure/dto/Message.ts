@@ -15,7 +15,7 @@ export enum RecvOP {
   RECONNECT = 11,
 }
 
-export enum MessageType {
+export enum ContentType {
   TEXT = 0,
   FILE = 1,
 }
@@ -31,10 +31,10 @@ export namespace RecvPayload {
 }
 
 export namespace SendPayload {
-  export interface Text {
+  export interface Content {
     mid: bigint; // Message ID
     cid: string; // Channel ID
-    mtype: MessageType; // Message Type {0: Text, 1: Image, 2: File, ...}
+    ctype: ContentType; // Message Type {0: Text, 1: Image, 2: File, ...}
     data: string;
     uid: number; // User ID
     uname: string; // User Name

@@ -21,7 +21,7 @@ export class AuthService {
     if (!isCorrectPw) throw new UnauthorizedException('Password incorrect');
 
     // get token generator by curried function
-    const tokenGenerator = JWTHelper.generate({ id: user.user_id });
+    const tokenGenerator = JWTHelper.generate({ uid: user.user_id });
     const accessToken = tokenGenerator(JWT_ACCESS_SECRET)({ expiresIn: '1h' });
     const refreshToken = tokenGenerator(JWT_REFRESH_SECRET)({ expiresIn: '7d' });
 
@@ -35,8 +35,7 @@ export class AuthService {
    * @param token JWT
    * @returns JWT payload
    */
-  public verifyAccessToken(token: string | undefined) {
-    if (!token) throw new WsException(ERROR.AUTH.NO_AUTH_TOKEN);
+  public verifyAccessToken(token: string) {
     try {
       return JWTHelper.verify<JWTPayload>(token)(JWT_ACCESS_SECRET)();
     } catch (e) {
@@ -61,7 +60,7 @@ export class AuthService {
 
   public async refresh(accessToken: string, refreshToken: string) {
     const payload = JWTHelper.decode<JWTPayload>(accessToken)();
-    const refresh = await this.userRepository.findRefreshTokenByUserId(payload.id);
+    const refresh = await this.userRepository.findRefreshTokenByUserId(payload.uid);
     if (!refresh) {
     }
   }

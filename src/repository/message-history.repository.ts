@@ -9,12 +9,12 @@ import { MessageSchema } from 'src/structure/model/message';
 export class MessageHistoryRepository {
   constructor(@InjectConnection() private readonly mongo: Db) {}
 
-  public async saveMessage(m: SendPayload.Text) {
+  public async saveMessage(m: SendPayload.Content) {
     return await this.mongo.collection<MessageSchema>(MESSAGE_HISTORY).insertOne({
       _id: m.mid,
       channel_id: m.cid,
       data: m.data,
-      message_type: m.mtype,
+      message_type: m.ctype,
       user_id: m.uid,
       user_name: m.uname,
     });
@@ -40,11 +40,11 @@ export class MessageHistoryRepository {
           return {
             mid: m._id,
             cid: m.channel_id,
-            mtype: m.message_type,
+            ctype: m.message_type,
             uid: m.user_id,
             uname: m.user_name,
             data: m.data,
-          } satisfies SendPayload.Text;
+          } satisfies SendPayload.Content;
         }),
       );
   }

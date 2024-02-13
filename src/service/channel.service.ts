@@ -2,7 +2,7 @@ import { Injectable, OnModuleInit, OnModuleDestroy, UseFilters, Inject, LoggerSe
 import { Server, Socket } from 'socket.io';
 import { GatewayException } from 'src/structure/dto/Exception';
 import * as error from 'src/structure/dto/Exception';
-import { MessageType, RecvOP, SendOP, SendPayload } from 'src/structure/dto/Message';
+import { ContentType, RecvOP, SendOP, SendPayload } from 'src/structure/dto/Message';
 import { RecvPayload, Message } from 'src/structure/dto/Message';
 import { UserService } from './user.service';
 import { AuthService } from './auth.service';
@@ -12,12 +12,12 @@ import { ConnectionService } from './connection.service';
 import { PrismaService } from './prisma.service';
 import { ChannelMemberRepository } from 'src/repository/channel-member.repository';
 import { JWTPayload } from 'src/structure/dto/Auth';
-import { Client } from 'src/structure/dto/Client';
 import { IChannelIdParam, ICreateChannelDto } from 'src/structure/dto/Channel';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { MessageHistoryRepository } from 'src/repository/message-history.repository';
 import { SnowFlake } from 'src/common/util/snowflake';
 import { BigIntegerUtil } from 'src/common/util/bInteger.util';
+import { UserRepository } from 'src/repository/user.repository';
 
 @Injectable()
 export class ChannelService implements OnModuleInit, OnModuleDestroy {
@@ -29,6 +29,7 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
     private readonly userService: UserService,
     private readonly channelRepository: ChannelRepository,
     private readonly connectionService: ConnectionService,
+    private readonly userRepository: UserRepository,
     private readonly memberRepository: ChannelMemberRepository,
     private readonly messageRepository: MessageHistoryRepository,
     @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: LoggerService,
@@ -60,7 +61,7 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
   }
 
   public async handleDisconnect(client: Socket) {
-    await this.connectionService.deregisterClient(client);
+    await this.connectionService.deregister(client);
   }
 
   /**
@@ -78,12 +79,12 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
     // Message validation
     typia.assertEquals<Message<RecvPayload.Text>>(message);
 
-    const msg: Message<SendPayload.Text> = {
+    const msg: Message<SendPayload.Content> = {
       op: SendOP.DISPATCH_MESSAGE,
       d: {
         cid: message.d.cid,
         mid: SnowFlake.generate(),
-        mtype: MessageType.TEXT,
+        ctype: ContentType.TEXT,
         data: message.d.data,
         uid: client.data.uid,
         uname: client.data.uname,
@@ -98,16 +99,17 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
 
     typia.assertEquals<Message<RecvPayload.Identify>>(message);
 
-    const { id: userId } = this.authService.verifyAccessToken(message.d.token);
+    const { uid } = this.authService.verifyAccessToken(message.d.token);
 
-    const regRst = await this.connectionService.registerClient(userId, client.id);
-    if (regRst.oldClient) await this.disconnectOldClient(server, regRst.oldClient);
+    await this.connectionService.register(client, uid).then(async (old) => {
+      if (old) await this.disconnectOldClient(server, old);
+    });
 
-    await this.initializeClient(client, userId);
+    await this.initializeClient(client, uid);
     const msg: Message = {
       op: SendOP.HELLO,
       d: {
-        uid: userId,
+        uid,
         channels: [...client.rooms].slice(1), // Client ID 제외
       },
     };
@@ -115,7 +117,7 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
   }
 
   private async initializeClient(client: Socket, userId: number) {
-    const { nickname } = await this.userService.getUserNickAndTypeByUserId(userId);
+    const { nickname } = await this.userRepository.findUserById(userId);
     const channels = await this.channelRepository.getJoinedChannelsIdByUserId(userId);
 
     client.data = { uid: userId, uname: nickname };
@@ -125,9 +127,11 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
     return;
   }
 
-  private async dispatch(server: Server, client: Socket, message: Message) {
-    // await this.checkChannelExists(message.d.channelId); 채널이 존재하는지 꼭 확인해야할까?
-    await this.checkMessagePermission(client, message);
+  private async dispatch(server: Server, client: Socket, message: Message<SendPayload.Content>) {
+    if (!client.rooms.has(message.d.cid)) {
+      throw new GatewayException(error.NO_PERMISSION);
+    }
+
     await this.messageRepository.saveMessage({ ...message.d });
 
     server.to(message.d.cid).emit('message', BigIntegerUtil.stringifyBigInt(message));
@@ -142,12 +146,6 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
   public async getChannelMembers(param: IChannelIdParam) {
     typia.assertEquals<IChannelIdParam>(param);
     return this.memberRepository.findChannelMembers(param.channelId);
-  }
-
-  private async checkMessagePermission(client: Socket, message: Message) {
-    if (!client.rooms.has(message.d.cid)) {
-      throw new GatewayException(error.NO_PERMISSION);
-    }
   }
 
   private isClientIdentified(client: Socket) {
@@ -167,20 +165,20 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
 
   public async createChannel(user: JWTPayload, dto: ICreateChannelDto) {
     typia.assertEquals<ICreateChannelDto>(dto);
-    const channel = await this.channelRepository.createChannel(user.id, dto.channelName);
+    const channel = await this.channelRepository.createChannel(user.uid, dto.channelName);
     return channel.id;
   }
 
   public async getJoinedChannels(user: JWTPayload) {
-    return this.channelRepository.getJoinedChannelListByUserId(user.id);
+    return this.channelRepository.getJoinedChannelListByUserId(user.uid);
   }
 
   public async addMemberToChannel(user: JWTPayload, param: IChannelIdParam) {
     typia.assertEquals<IChannelIdParam>(param);
     await this.checkChannelExists(param.channelId);
-    const result = await this.channelRepository.addMemberToChannel(user.id, param.channelId);
+    const result = await this.channelRepository.addMemberToChannel(user.uid, param.channelId);
 
-    const clientId = await this.connectionService.getClientId(user.id);
+    const clientId = await this.connectionService.getClientId(user.uid);
     // if client is online
     if (!clientId) return result;
 
