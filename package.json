@@ -19,7 +19,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json --verbose --detectOpenHandles --forceExit",
-    "prepare": "ts-patch install"
+    "prepare": "ts-patch install && typia patch"
   },
   "dependencies": {
     "@liaoliaots/nestjs-redis": "^9.0.5",
@@ -83,10 +83,10 @@
     "supertest": "^6.3.3",
     "ts-jest": "^29.1.0",
     "ts-loader": "^9.4.3",
-    "ts-node": "^10.9.1",
-    "ts-patch": "^3.0.2",
+    "ts-node": "^10.9.2",
+    "ts-patch": "^3.1.2",
     "tsconfig-paths": "^4.2.0",
-    "typescript": "5.2.2"
+    "typescript": "5.3.2"
   },
   "jest": {
     "moduleFileExtensions": [

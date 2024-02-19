@@ -1,4 +1,12 @@
-import { Injectable, OnModuleInit, OnModuleDestroy, UseFilters, Inject, LoggerService } from '@nestjs/common';
+import {
+  Injectable,
+  OnModuleInit,
+  OnModuleDestroy,
+  UseFilters,
+  Inject,
+  LoggerService,
+  BadRequestException,
+} from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { GatewayException } from 'src/structure/dto/Exception';
 import * as error from 'src/structure/dto/Exception';
@@ -18,6 +26,7 @@ import { MessageHistoryRepository } from 'src/repository/message-history.reposit
 import { SnowFlake } from 'src/common/util/snowflake';
 import { BigIntegerUtil } from 'src/common/util/bInteger.util';
 import { UserRepository } from 'src/repository/user.repository';
+import { Wrapper } from 'src/common/util/wrapper';
 
 @Injectable()
 export class ChannelService implements OnModuleInit, OnModuleDestroy {
@@ -46,7 +55,7 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
    * @returns
    */
   public async handleMessage(server: Server, client: Socket, message: Message) {
-    this.logger.log(message);
+    this.logger.verbose!(message);
     switch (message.op) {
       case RecvOP.SEND_MESSAGE: {
         return await this.sendMessage(server, client, message);
@@ -144,7 +153,14 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
    * @returns {Array<User>} 멤버 목록
    */
   public async getChannelMembers(param: IChannelIdParam) {
-    typia.assertEquals<IChannelIdParam>(param);
+    Wrapper.TryOrThrow(
+      () => typia.assertEquals<IChannelIdParam>(param),
+      new BadRequestException({
+        code: '123-123',
+        title: '채널 참가자 조회에 실패했습니다.',
+        message: '요청 형식이 올바르지 않습니다.',
+      }),
+    );
     return this.memberRepository.findChannelMembers(param.channelId);
   }
 
@@ -164,7 +180,14 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
   }
 
   public async createChannel(user: JWTPayload, dto: ICreateChannelDto) {
-    typia.assertEquals<ICreateChannelDto>(dto);
+    Wrapper.TryOrThrow(
+      () => typia.assertEquals<ICreateChannelDto>(dto),
+      new BadRequestException({
+        code: '123-123',
+        title: '채널 생성에 실패했습니다.',
+        message: '요청 형식이 올바르지 않습니다.',
+      }),
+    );
     const channel = await this.channelRepository.createChannel(user.uid, dto.channelName);
     return channel.id;
   }
@@ -174,7 +197,15 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
   }
 
   public async addMemberToChannel(user: JWTPayload, param: IChannelIdParam) {
-    typia.assertEquals<IChannelIdParam>(param);
+    Wrapper.TryOrThrow(
+      () => typia.assertEquals<IChannelIdParam>(param),
+      new BadRequestException({
+        code: '123-123',
+        title: '채널 생성에 실패했습니다.',
+        message: '요청 형식이 올바르지 않습니다.',
+      }),
+    );
+
     await this.checkChannelExists(param.channelId);
     const result = await this.channelRepository.addMemberToChannel(user.uid, param.channelId);
 

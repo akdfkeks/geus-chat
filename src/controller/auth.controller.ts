@@ -1,22 +1,20 @@
 import { Body, Controller, Get, HttpCode, Param, Post, Query, UseFilters, UseGuards } from '@nestjs/common';
+import { BadRequestFilter } from 'src/common/filter/BadRequest.filter';
 import { AuthService } from 'src/service/auth.service';
 import typia from 'typia';
 
+@UseFilters(BadRequestFilter)
 @Controller('/v1/auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @UseFilters()
-  @UseGuards()
   @Post('/login')
   public async onLoginRequest(@Body() body: any) {
-    typia.assertEquals<{ email: string; password: string }>(body);
-    return await this.authService.login(body.email, body.password);
+    return await this.authService.login(body);
   }
 
   @Post('/refresh')
   public async onRefreshRequest(@Body() body: any) {
-    typia.assertEquals<{ accessToken: string; refreshToken: string }>(body);
-    return await this.authService.refresh(body.accessToken, body.refreshToken);
+    return await this.authService.refresh(body);
   }
 }
