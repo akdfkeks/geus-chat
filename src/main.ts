@@ -7,7 +7,7 @@ import { BadRequestFilter } from './common/filter/BadRequest.filter';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  app.useGlobalFilters(new BadRequestFilter());
+  app.useGlobalFilters();
 
   app.useWebSocketAdapter(new RedisIoAdapter(app));
 
