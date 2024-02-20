@@ -4,10 +4,10 @@ import { UserGuard } from 'src/common/guard/jwt.guard';
 import { JWTPayload } from 'src/structure/dto/Auth';
 import { IChannelIdParam } from 'src/structure/dto/Channel';
 import { ChannelService } from 'src/service/channel.service';
-import { GlobalRequestFilter } from 'src/common/filter/GlobalRequest.filter';
+import { GlobalHttpExceptionFilter } from 'src/common/filter/GlobalHttpException.filter';
 import { BadRequestFilter } from 'src/common/filter/BadRequest.filter';
 
-@UseFilters(GlobalRequestFilter, BadRequestFilter)
+@UseFilters(BadRequestFilter)
 @UseGuards(UserGuard)
 @Controller('/v2/channel')
 export class ChannelController {
