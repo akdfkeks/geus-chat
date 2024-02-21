@@ -13,8 +13,9 @@ export class MessageHistoryRepository {
     return await this.mongo.collection<MessageSchema>(MESSAGE_HISTORY).insertOne({
       _id: m.mid,
       channel_id: m.cid,
-      data: m.data,
       message_type: m.ctype,
+      data: m.data,
+			time:m.time,
       user_id: m.uid,
       user_name: m.uname,
     });
@@ -41,9 +42,10 @@ export class MessageHistoryRepository {
             mid: m._id,
             cid: m.channel_id,
             ctype: m.message_type,
+            data: m.data,
+            time: m.time,
             uid: m.user_id,
             uname: m.user_name,
-            data: m.data,
           } satisfies SendPayload.Content;
         }),
       );
