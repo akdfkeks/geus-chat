@@ -36,6 +36,7 @@ export namespace SendPayload {
     cid: string; // Channel ID
     ctype: ContentType; // Message Type {0: Text, 1: Image, 2: File, ...}
     data: string;
+    time: string; // ISO 8601
     uid: number; // User ID
     uname: string; // User Name
   }

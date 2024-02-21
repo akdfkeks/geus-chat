@@ -80,13 +80,15 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
     // Message validation
     typia.assertEquals<Message<RecvPayload.Text>>(message);
 
+		const snowflakeId = SnowFlake.generate();
     const msg: Message<SendPayload.Content> = {
       op: SendOP.DISPATCH_MESSAGE,
       d: {
         cid: message.d.cid,
-        mid: SnowFlake.generate(),
+        mid: snowflakeId,
         ctype: ContentType.TEXT,
         data: message.d.data,
+        time: SnowFlake.parseDate(snowflakeId).toISOString(),
         uid: client.data.uid,
         uname: client.data.uname,
       },

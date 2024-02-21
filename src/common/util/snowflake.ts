@@ -14,7 +14,7 @@ export namespace SnowFlake {
     }
   };
   export const parseDate = (snowflake: number | bigint) => {
-    const ms = (BigInt(snowflake) >> 22n) as unknown as number;
+    const ms = Number(typeof snowflake === 'bigint' ? snowflake >> 22n : snowflake >> 22);
     return new Date(ms + GEUS_EPOCH);
   };
 }
