@@ -1,11 +1,10 @@
 import { ArgumentsHost, BadRequestException, Catch, ExceptionFilter, Inject } from '@nestjs/common';
-import { TypeGuardError } from 'typia';
 import { Request, Response } from 'express';
-import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
+import { LoggerService } from 'src/module/winston.module';
 
 @Catch(BadRequestException)
 export class BadRequestFilter implements ExceptionFilter {
-  constructor() {}
+  constructor(private readonly logger: LoggerService) {}
 
   public catch(exception: BadRequestException, host: ArgumentsHost) {
     const ctx = host.switchToHttp();

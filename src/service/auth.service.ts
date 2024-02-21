@@ -16,7 +16,6 @@ export class AuthService {
   constructor(private readonly userRepository: UserRepository) {}
 
   public async login(dto: IUserLoginDto) {
-    console.log(dto);
     Wrapper.TryOrThrow(
       () => typia.assertEquals<IUserLoginDto>(dto),
       new BadRequestException({

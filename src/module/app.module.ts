@@ -5,10 +5,10 @@ import { CacheModule } from './cache.module';
 import { AuthModule } from './auth.module';
 import { PrismaModule } from './prisma.module';
 import { MongoModule } from './mongo.module';
-import { LoggerContextMiddleware } from 'src/common/middleware/logger.middleware';
 import { WinstonModule } from 'src/module/winston.module';
 import { GlobalHttpExceptionFilter } from 'src/common/filter/GlobalHttpException.filter';
 import { APP_FILTER } from '@nestjs/core';
+import { HttpRequestLogger } from 'src/common/middleware/http-request-logger.middleware';
 
 @Module({
   imports: [EnvConfigModule, ChannelModule, CacheModule, AuthModule, PrismaModule, MongoModule, WinstonModule],
@@ -23,6 +23,6 @@ import { APP_FILTER } from '@nestjs/core';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(LoggerContextMiddleware).forRoutes('*');
+    consumer.apply(HttpRequestLogger).forRoutes('*');
   }
 }

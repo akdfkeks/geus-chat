@@ -1,7 +1,7 @@
-import { Body, Controller, Get, HttpCode, Param, Post, Query, UseFilters, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, UseFilters } from '@nestjs/common';
 import { BadRequestFilter } from 'src/common/filter/BadRequest.filter';
+import { GlobalHttpExceptionFilter } from 'src/common/filter/GlobalHttpException.filter';
 import { AuthService } from 'src/service/auth.service';
-import typia from 'typia';
 
 @UseFilters(BadRequestFilter)
 @Controller('/v1/auth')
