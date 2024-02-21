@@ -1,12 +1,4 @@
-import {
-  Injectable,
-  OnModuleInit,
-  OnModuleDestroy,
-  UseFilters,
-  Inject,
-  LoggerService,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, OnModuleInit, OnModuleDestroy, BadRequestException } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { GatewayException } from 'src/structure/dto/Exception';
 import * as error from 'src/structure/dto/Exception';
@@ -21,12 +13,12 @@ import { PrismaService } from './prisma.service';
 import { ChannelMemberRepository } from 'src/repository/channel-member.repository';
 import { JWTPayload } from 'src/structure/dto/Auth';
 import { IChannelIdParam, ICreateChannelDto } from 'src/structure/dto/Channel';
-import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { MessageHistoryRepository } from 'src/repository/message-history.repository';
 import { SnowFlake } from 'src/common/util/snowflake';
 import { BigIntegerUtil } from 'src/common/util/bInteger.util';
 import { UserRepository } from 'src/repository/user.repository';
 import { Wrapper } from 'src/common/util/wrapper';
+import { LogLevel, LoggerService } from 'src/module/winston.module';
 
 @Injectable()
 export class ChannelService implements OnModuleInit, OnModuleDestroy {
@@ -41,7 +33,7 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
     private readonly userRepository: UserRepository,
     private readonly memberRepository: ChannelMemberRepository,
     private readonly messageRepository: MessageHistoryRepository,
-    @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: LoggerService,
+    private readonly logger: LoggerService,
   ) {}
 
   public async onModuleInit() {}
@@ -55,7 +47,7 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
    * @returns
    */
   public async handleMessage(server: Server, client: Socket, message: Message) {
-    this.logger.verbose!(message);
+    this.logger.log(LogLevel.DEBUG, 'Message logging', { message });
     switch (message.op) {
       case RecvOP.SEND_MESSAGE: {
         return await this.sendMessage(server, client, message);
@@ -64,7 +56,7 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
         return await this.identifyClient(server, client, message);
       }
       default:
-        this.logger.warn(message);
+        this.logger.log(LogLevel.WARN, 'Unknown operation', { message });
         return;
     }
   }

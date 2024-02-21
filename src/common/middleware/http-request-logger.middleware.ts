@@ -10,12 +10,9 @@ export class HttpRequestLogger implements NestMiddleware {
   ) {}
 
   use(req: Request, res: Response, next: NextFunction) {
+		if (process.env.NODE_ENV === 'prod') return;
     res.on('finish', () => {
-      const { ip, method, originalUrl } = req;
-      const userAgent = req.get('user-agent');
-      const userId = (req as any).user?.uid || undefined;
-
-      this.logger.log(LogLevel.DEBUG, `${ip} USER-${userId} ${method} ${originalUrl} ${res.statusCode} ${userAgent}`);
+      this.logger.log(LogLevel.DEBUG, 'request logging', { headers: req.headers });
     });
 
     next();
