@@ -13,9 +13,11 @@ export class GlobalHttpExceptionFilter implements ExceptionFilter {
     const res = ctx.getResponse<Response>();
 
     this.logger.log(LogLevel.ERROR, 'Unhandled exception', {
-      headers: req.headers,
-      body: req.body,
-      stack: exception.stack || '',
+      data: {
+        headers: req.headers,
+        body: req.body,
+        stack: exception.stack || '',
+      },
     });
     if (exception instanceof HttpException) {
       res.status(exception.getStatus()).json({

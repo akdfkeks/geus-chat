@@ -1,4 +1,4 @@
-import { Injectable, OnModuleInit, OnModuleDestroy, BadRequestException } from '@nestjs/common';
+import { Injectable, OnModuleInit, OnModuleDestroy, BadRequestException, Inject, forwardRef } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { GatewayException } from 'src/structure/dto/Exception';
 import * as error from 'src/structure/dto/Exception';
@@ -47,7 +47,7 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
    * @returns
    */
   public async handleMessage(server: Server, client: Socket, message: Message) {
-    this.logger.log(LogLevel.DEBUG, 'Message logging', { message });
+    this.logger.log(LogLevel.DEBUG, 'Message logging', { data: message });
     switch (message.op) {
       case RecvOP.SEND_MESSAGE: {
         return await this.sendMessage(server, client, message);
