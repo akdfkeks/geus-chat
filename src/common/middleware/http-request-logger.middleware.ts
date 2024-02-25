@@ -10,7 +10,6 @@ export class HttpRequestLogger implements NestMiddleware {
   ) {}
 
   use(req: Request, res: Response, next: NextFunction) {
-		if (process.env.NODE_ENV === 'prod') return;
     res.on('finish', () => {
       this.logger.log(LogLevel.DEBUG, 'request logging', { data: { headers: req.headers } });
     });
