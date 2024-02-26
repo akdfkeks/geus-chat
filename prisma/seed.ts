@@ -7,6 +7,11 @@ const prisma = new PrismaClient();
 async function main() {
   const userNames = ['alice', 'bob', 'joi'];
   const channelIds = [ulid(), ulid(), ulid(), ulid()];
+	
+	await prisma.gh_MemberInChannel.deleteMany();
+  await prisma.gh_ChannelInfo.deleteMany();
+  await prisma.gh_Channel_Token.deleteMany();
+  await prisma.gh_User.deleteMany();
 
   await prisma.gh_User.createMany({
     skipDuplicates: true,
@@ -28,44 +33,12 @@ async function main() {
 
   await prisma.gh_MemberInChannel.createMany({
     skipDuplicates: true,
-    data: [
-      {
-        user_id: users[0].user_id,
-        channel_id: channelIds[0],
-      },
-      {
-        user_id: users[0].user_id,
-        channel_id: channelIds[1],
-      },
-      {
-        user_id: users[0].user_id,
-        channel_id: channelIds[2],
-      },
-      {
-        user_id: users[1].user_id,
-        channel_id: channelIds[0],
-      },
-      {
-        user_id: users[1].user_id,
-        channel_id: channelIds[2],
-      },
-      {
-        user_id: users[2].user_id,
-        channel_id: channelIds[3],
-      },
-    ],
+    data: users.map((u) => ({
+      user_id: u.user_id,
+      channel_id: channelIds[Math.floor(Math.random() * channelIds.length - 1)],
+    })),
   });
 }
-
-// main()
-//   .then(async () => {
-//     await prisma.$disconnect();
-//   })
-//   .catch(async (e) => {
-//     console.error(e);
-//     await prisma.$disconnect();
-//     process.exit(1);
-//   });
 
 export default async function prismaSeed() {
   console.log('\nSetting up test data ...\n');
