@@ -1,9 +1,10 @@
-import { Global, Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
-import { MESSAGE_HISTORY } from 'src/common/constant/database';
-import * as mongoose from 'mongoose';
-import { MessageSchema } from 'src/structure/model/message';
 
-export const MongoModule = MongooseModule.forRoot('mongodb://localhost/geus', {
-  autoCreate: true,
+export const MongoModule = MongooseModule.forRootAsync({
+  imports: [ConfigModule],
+  inject: [ConfigService],
+  useFactory: async (config: ConfigService) => ({
+    uri: config.get('MONGODB_URL'),
+  }),
 });
