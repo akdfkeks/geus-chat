@@ -1,7 +1,7 @@
 import { IoAdapter } from '@nestjs/platform-socket.io';
 import { Server, ServerOptions } from 'socket.io';
 import { createAdapter } from '@socket.io/redis-adapter';
-import { createClient } from 'redis';
+import { Redis } from 'ioredis';
 import { INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
@@ -11,11 +11,10 @@ export class RedisIoAdapter extends IoAdapter {
   constructor(app: INestApplication) {
     super(app);
     const configService = app.get(ConfigService);
-    const pubClient = createClient({
-      socket: {
-        host: configService.get('REDIS_HOST'),
-        port: configService.get('REDIS_PORT'),
-      },
+    const pubClient = new Redis({
+      host: configService.get('REDIS_HOST'),
+      port: configService.get('REDIS_PORT'),
+      lazyConnect: true,
     });
     const subClient = pubClient.duplicate();
 
