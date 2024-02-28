@@ -35,7 +35,7 @@ async function main() {
     skipDuplicates: true,
     data: users.map((u) => ({
       user_id: u.user_id,
-      channel_id: channelIds[Math.floor(Math.random() * channelIds.length - 1)],
+      channel_id: channelIds[Math.floor(Math.random() * (channelIds.length - 1))],
     })),
   });
 }
