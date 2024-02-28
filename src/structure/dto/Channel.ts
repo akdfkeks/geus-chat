@@ -7,3 +7,9 @@ export interface IChannelIdParam {
 export interface ICreateChannelDto {
   channelName: string & tags.MinLength<1> & tags.MaxLength<30>;
 }
+
+export interface IGetChannelMessageQuery {
+  after?: string & tags.Pattern<'^[0-9]+$'>;
+  before?: string & tags.Pattern<'^[0-9]+$'>;
+  limit?: string & tags.Pattern<'^[0-9]+$'>;
+}

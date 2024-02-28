@@ -1,10 +1,9 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Post, Query, UseFilters, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, UseFilters, UseGuards } from '@nestjs/common';
 import { ReqUser } from 'src/common/decorator/user';
 import { UserGuard } from 'src/common/guard/jwt.guard';
 import { JWTPayload } from 'src/structure/dto/Auth';
-import { IChannelIdParam } from 'src/structure/dto/Channel';
+import { IChannelIdParam, IGetChannelMessageQuery } from 'src/structure/dto/Channel';
 import { ChannelService } from 'src/service/channel.service';
-import { GlobalHttpExceptionFilter } from 'src/common/filter/GlobalHttpException.filter';
 import { BadRequestFilter } from 'src/common/filter/BadRequest.filter';
 
 @UseFilters(BadRequestFilter)
@@ -18,18 +17,12 @@ export class ChannelController {
     return this.channelService.getJoinedChannels(user);
   }
 
-  /**
-   * Dev Only
-   */
   @Post('/')
   public async onCreateChannelRequest(@ReqUser() user: JWTPayload, @Body() body: any) {
     const channelId = await this.channelService.createChannel(user, body);
     return { channelId };
   }
 
-  /**
-   * Dev Only
-   */
   @Get('/:channelId/join')
   public async onChannelJoinRequest(@ReqUser() user: JWTPayload, @Param() param: any) {
     const result = await this.channelService.addMemberToChannel(user, param);
@@ -42,14 +35,15 @@ export class ChannelController {
     return { members: result };
   }
 
-  // @Post('/:channelId/member')
-  // public async onChannelMemberInviteRequest(@Param('channelId') channelId: string, @Body('userId') userId: number) {
-  //   const result = await this.channelService.inviteUserToChannel(channelId, userId);
-  //   return result;
-  // }
-
-  // @Delete('/:channelId/member')
-  // public async onKickChannelMemberRequest(@Param() channelId: string, @Body('email') email: string) {
-  //   return {};
-  // }
+  @Get('/:channelId/message')
+  public async onChannelMessageRequest(
+    @ReqUser() user: JWTPayload,
+    @Param() param: IChannelIdParam,
+    @Query() query: IGetChannelMessageQuery,
+  ) {
+    return {
+      channelId: param.channelId,
+      messages: await this.channelService.getMessageHistory(user, param, query),
+    };
+  }
 }
