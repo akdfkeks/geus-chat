@@ -3,7 +3,7 @@ import * as Joi from 'joi';
 
 export const EnvConfigModule = ConfigModule.forRoot({
   isGlobal: true,
-  envFilePath: process.env.NODE_ENV == 'prod' ? '.env' : '.dev.env',
+  envFilePath: process.env.NODE_ENV == 'prod' ? 'prod.env' : 'dev.env',
   validationSchema: Joi.object({
     SOCKET_PORT: Joi.string().required(),
     NODE_PORT: Joi.string().required(),
