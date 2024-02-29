@@ -3,7 +3,6 @@ export namespace Wrapper {
     try {
       return tryable();
     } catch (e) {
-      console.log(e);
       throw throwable ?? e;
     }
   };

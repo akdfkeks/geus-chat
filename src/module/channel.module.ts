@@ -10,7 +10,7 @@ import { ChannelGateway } from 'src/controller/channel.gateway';
 import { ChannelMemberRepository } from 'src/repository/channel-member.repository';
 import { ChannelController } from 'src/controller/channel.controller';
 import { MongoModule } from './mongo.module';
-import { MessageHistoryRepository } from 'src/repository/message-history.repository';
+import { MessageRepository } from 'src/repository/message.repository';
 
 @Module({
   imports: [MongoModule],
@@ -26,7 +26,7 @@ import { MessageHistoryRepository } from 'src/repository/message-history.reposit
     ChannelRepository,
     UserRepository,
     ChannelMemberRepository,
-    MessageHistoryRepository,
+    MessageRepository,
   ],
   exports: [],
 })

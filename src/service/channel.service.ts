@@ -1,4 +1,4 @@
-import { Injectable, OnModuleInit, OnModuleDestroy, BadRequestException, Inject, forwardRef } from '@nestjs/common';
+import { Injectable, OnModuleInit, OnModuleDestroy, BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { GatewayException } from 'src/structure/dto/Exception';
 import * as error from 'src/structure/dto/Exception';
@@ -12,8 +12,8 @@ import { ConnectionService } from './connection.service';
 import { PrismaService } from './prisma.service';
 import { ChannelMemberRepository } from 'src/repository/channel-member.repository';
 import { JWTPayload } from 'src/structure/dto/Auth';
-import { IChannelIdParam, ICreateChannelDto } from 'src/structure/dto/Channel';
-import { MessageHistoryRepository } from 'src/repository/message-history.repository';
+import { IChannelIdParam, ICreateChannelDto, IGetChannelMessageQuery } from 'src/structure/dto/Channel';
+import { MessageRepository } from 'src/repository/message.repository';
 import { SnowFlake } from 'src/common/util/snowflake';
 import { BigIntegerUtil } from 'src/common/util/bInteger.util';
 import { UserRepository } from 'src/repository/user.repository';
@@ -32,7 +32,7 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
     private readonly connectionService: ConnectionService,
     private readonly userRepository: UserRepository,
     private readonly memberRepository: ChannelMemberRepository,
-    private readonly messageRepository: MessageHistoryRepository,
+    private readonly messageRepository: MessageRepository,
     private readonly logger: LoggerService,
   ) {}
 
@@ -65,13 +65,6 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
     await this.connectionService.deregister(client);
   }
 
-  /**
-   * @description [WS Only] 유저가 전송한 메세지를 특정 채널에 전송합니다.
-   * @param {object} server socket.io Server 객체
-   * @param {object} client socket.io Socket 객체
-   * @param {object} message 유저가 전송한 메세지 객체
-   * @throws {GatewayException, TypeGuardError}
-   */
   public async sendMessage(server: Server, client: Socket, message: Message<RecvPayload.Text>) {
     if (!this.isClientIdentified(client)) {
       throw new GatewayException(error.CLIENT_NOT_IDENTIFIED);
@@ -80,7 +73,7 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
     // Message validation
     typia.assertEquals<Message<RecvPayload.Text>>(message);
 
-		const snowflakeId = SnowFlake.generate();
+    const snowflakeId = SnowFlake.generate();
     const msg: Message<SendPayload.Content> = {
       op: SendOP.DISPATCH_MESSAGE,
       d: {
@@ -141,11 +134,6 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
     return;
   }
 
-  /**
-   * @description 채널 소속 멤버를 조회합니다.
-   * @param {string} param
-   * @returns {Array<User>} 멤버 목록
-   */
   public async getChannelMembers(param: IChannelIdParam) {
     Wrapper.TryOrThrow(
       () => typia.assertEquals<IChannelIdParam>(param),
@@ -232,5 +220,32 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
     };
     oldClient?.emit('message', error);
     oldClient?.disconnect();
+  }
+
+  public async getMessageHistory(user: JWTPayload, param: IChannelIdParam, query: IGetChannelMessageQuery) {
+    Wrapper.TryOrThrow(
+      () => {
+        typia.assertEquals<IChannelIdParam>(param);
+        typia.assertEquals<IGetChannelMessageQuery>(query);
+      },
+      new BadRequestException({
+        code: '123-123',
+        title: '대화내역을 불러오지 못했습니다.',
+        message: '요청 형식이 올바르지 않습니다.',
+      }),
+    );
+    const isMemberOfChannel = (await this.memberRepository.findChannelMembers(param.channelId))
+      .map(({ id }) => id)
+      .includes(user.uid);
+
+    if (!isMemberOfChannel) {
+      throw new UnauthorizedException({
+        code: '123-123',
+        title: '대화내역을 불러오지 못했습니다.',
+        message: '잘못된 요청입니다.',
+      });
+    }
+
+    return this.messageRepository.getMessagesByQuery(param.channelId, query);
   }
 }
