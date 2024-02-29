@@ -1,0 +1,25 @@
+version: "1.0"
+
+services:
+  redis-server:
+    container_name: redis-server
+    image: redis:7.2
+    # networks:
+    #   - geus-net
+    ports:
+      - 6380:6379
+
+  geus-chat:
+    container_name: geus-chat
+    image: akdfkeks/geus-chat:0.1
+    depends_on:
+      - redis-server
+    # networks:
+    #   - geus-net
+    ports:
+      - 3001:3000
+    env_file:
+      - .for-docker.env
+
+# networks:
+#   geus-net:
