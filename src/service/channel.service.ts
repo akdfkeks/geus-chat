@@ -112,7 +112,7 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
     client.send(msg);
   }
 
-  private async initializeClient(client: Socket, userId: number) {
+  private async initializeClient(client: Socket, userId: string) {
     const { nickname } = await this.userRepository.findUserById(userId);
     const channels = await this.channelRepository.getJoinedChannelsIdByUserId(userId);
 
@@ -175,7 +175,7 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
   }
 
   public async getJoinedChannels(user: JWTPayload) {
-    return this.channelRepository.getJoinedChannelListByUserId(user.uid);
+    return { channels: await this.channelRepository.getJoinedChannelListByUserId(user.uid) };
   }
 
   public async addMemberToChannel(user: JWTPayload, param: IChannelIdParam) {

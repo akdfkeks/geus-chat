@@ -1,25 +1,32 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/service/prisma.service';
+import { IFindChannelMemberResult } from 'src/structure/dto/Channel';
 
 @Injectable()
 export class ChannelMemberRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   public async findChannelMembers(channelId: string) {
-    const members = await this.prisma.gh_MemberInChannel.findMany({
-      where: { channel_id: channelId },
-      include: {
-        user: {
-          select: {
-            nickname: true,
-            user_id: true,
-            user_type: true,
+    return this.prisma.gh_MemberInChannel
+      .findMany({
+        where: { channel_id: BigInt(channelId) },
+        include: {
+          user: {
+            select: {
+              id: true,
+              nickname: true,
+              user_type: true,
+            },
           },
         },
-      },
-    });
-    return members.map(({ user }) => {
-      return { id: user.user_id, type: user.user_type, nickname: user.nickname };
-    });
+      })
+      .then((rst) =>
+        rst.map(({ user }) => {
+          return {
+            id: user.id.toString(),
+            nickname: user.nickname,
+          } satisfies IFindChannelMemberResult;
+        }),
+      );
   }
 }

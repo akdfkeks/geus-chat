@@ -1,14 +1,19 @@
 import { PrismaClient } from '@prisma/client';
-import { log } from 'console';
-import { ulid } from 'ulidx';
+import { SnowFlake } from '../src/common/util/snowflake';
 
 const prisma = new PrismaClient();
 
 async function main() {
   const userNames = ['alice', 'bob', 'joi'];
-  const channelIds = [ulid(), ulid(), ulid(), ulid()];
-	
-	await prisma.gh_MemberInChannel.deleteMany();
+  const channelIds = [
+    SnowFlake.generate(),
+    SnowFlake.generate(),
+    SnowFlake.generate(),
+    SnowFlake.generate(),
+    SnowFlake.generate(),
+  ];
+
+  await prisma.gh_MemberInChannel.deleteMany();
   await prisma.gh_ChannelInfo.deleteMany();
   await prisma.gh_Channel_Token.deleteMany();
   await prisma.gh_User.deleteMany();
@@ -18,14 +23,14 @@ async function main() {
     data: createDummyFromUserNames(userNames),
   });
 
-  const users = await prisma.gh_User.findMany({ where: { user_id: { gte: 0 } } });
+  const users = await prisma.gh_User.findMany({ where: { id: { gte: 0 } } });
 
   await prisma.gh_ChannelInfo.createMany({
     skipDuplicates: true,
     data: channelIds.map((ulid, index) => {
       return {
         id: ulid,
-        owner_id: users[0].user_id,
+        owner_id: users[0].id,
         name: 'channel' + index,
       };
     }),
@@ -34,7 +39,7 @@ async function main() {
   await prisma.gh_MemberInChannel.createMany({
     skipDuplicates: true,
     data: users.map((u) => ({
-      user_id: u.user_id,
+      user_id: u.id,
       channel_id: channelIds[Math.floor(Math.random() * (channelIds.length - 1))],
     })),
   });
@@ -56,6 +61,7 @@ export default async function prismaSeed() {
 function createDummyFromUserNames(names: string[]) {
   return names.map((name, index) => {
     return {
+      id: SnowFlake.generate(),
       email: name + '@example.com',
       birth: new Date(),
       name: name,

@@ -5,15 +5,11 @@ import { Socket, io } from 'socket.io-client';
 import { RecvOP, SendOP } from 'src/structure/dto/Message';
 import { RedisIoAdapter } from 'src/common/adapter/redis.adapter';
 import { ConfigService } from '@nestjs/config';
-import { RecvPayload, SendPayload, Message } from 'src/structure/dto/Message';
-import { AuthService } from 'src/service/auth.service';
+import { RecvPayload, Message } from 'src/structure/dto/Message';
 import * as error from 'src/structure/dto/Exception';
 import * as request from 'supertest';
-import { log } from 'console';
-import { ulid } from 'ulidx';
-import { Client } from 'src/structure/dto/Client';
-import typia from 'typia';
 import { BigIntegerUtil } from 'src/common/util/bInteger.util';
+import { SnowFlake } from 'src/common/util/snowflake';
 
 describe('[Socket] ChannelGateway (e2e)', () => {
   let app: INestApplication;
@@ -162,7 +158,7 @@ describe('[Socket] ChannelGateway (e2e)', () => {
         sender.send({
           op: RecvOP.SEND_MESSAGE,
           d: {
-            cid: ulid(),
+            cid: SnowFlake.generate().toString(),
             data: 'hello',
           },
         } satisfies Message<RecvPayload.Text>);
@@ -190,8 +186,7 @@ describe('[Socket] ChannelGateway (e2e)', () => {
         sender.send(testMessage);
         sender.on('message', (data) => {
           if (data.op === SendOP.DISPATCH_MESSAGE) {
-            const parsed = BigIntegerUtil.parseBigInt(data);
-            expect(parsed.d.cid).toBe(testMessage.d.cid);
+            expect(data.d.cid).toBe(testMessage.d.cid);
             res();
           } else rej();
         });
@@ -210,8 +205,7 @@ describe('[Socket] ChannelGateway (e2e)', () => {
         sender.send(testMessage);
         receiver.on('message', (data) => {
           if (data.op === SendOP.DISPATCH_MESSAGE) {
-            const parsed = BigIntegerUtil.parseBigInt(data);
-            expect(parsed.d.cid).toBe(testMessage.d.cid);
+            expect(data.d.cid).toBe(testMessage.d.cid);
             res();
           } else rej();
         });

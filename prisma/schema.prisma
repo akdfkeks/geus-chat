@@ -8,7 +8,7 @@ datasource db {
 }
 
 model gh_User {
-  user_id           Int                  @id @default(autoincrement())
+  id                BigInt               @id
   created_at        DateTime?            @db.DateTime(6)
   deleted_at        DateTime?            @db.DateTime(6)
   updated_at        DateTime?            @db.DateTime(6)
@@ -41,9 +41,9 @@ model gh_Social {
 model gh_MemberInChannel {
   id         Int            @id @default(autoincrement())
   channel    gh_ChannelInfo @relation(fields: [channel_id], references: [id])
-  channel_id String         @db.Char(36)
-  user       gh_User        @relation(fields: [user_id], references: [user_id])
-  user_id    Int
+  channel_id BigInt         @db.UnsignedBigInt
+  user       gh_User        @relation(fields: [user_id], references: [id])
+  user_id    BigInt
 
   @@unique([user_id, channel_id])
   @@index([channel_id], map: "member_in_channel_channel_id_fkey")
@@ -51,10 +51,11 @@ model gh_MemberInChannel {
 }
 
 model gh_ChannelInfo {
-  id       String               @id @db.Char(36)
+  id       BigInt               @id @db.UnsignedBigInt
   name     String
-  owner    gh_User              @relation(fields: [owner_id], references: [user_id])
-  owner_id Int
+  icon_url String?              @db.VarChar(2047)
+  owner    gh_User              @relation(fields: [owner_id], references: [id])
+  owner_id BigInt
   members  gh_MemberInChannel[]
 
   @@map("channel_info")
@@ -63,9 +64,9 @@ model gh_ChannelInfo {
 model gh_Channel_Token {
   id            Int       @id @default(autoincrement())
   refresh_token String    @unique
-  user_id       Int       @unique
+  user_id       BigInt    @unique
   created_at    DateTime  @default(now()) @db.DateTime()
-  expires_at    DateTime? @db.DateTime()
+  expire_at     DateTime? @db.DateTime()
 
   @@map("channel_token")
 }

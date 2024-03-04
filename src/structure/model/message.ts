@@ -4,6 +4,6 @@ export interface MessageSchema {
   message_type: number;
   data: any;
   time: string;
-  user_id: number;
+  user_id: string;
   user_name: string;
 }

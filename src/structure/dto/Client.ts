@@ -1,6 +1,6 @@
 export namespace Client {
   export interface InitPayload {
-    uid: number;
+    uid: string;
     uname: string;
   }
 }

@@ -3,7 +3,7 @@ import typia from 'typia';
 import * as tags from 'typia/lib/tags';
 
 export interface JWTPayload {
-  uid: number;
+  uid: string;
 }
 
 export interface IUserLoginDto {
