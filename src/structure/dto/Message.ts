@@ -22,7 +22,7 @@ export enum ContentType {
 
 export namespace RecvPayload {
   export interface Text {
-    cid: string & tags.Pattern<'^[0-9A-HJKMNP-TV-Z]{26}$'>;
+    cid: string & tags.Pattern<'^[0-9]+$'>;
     data: string & tags.MinLength<1> & tags.MaxLength<2000>;
   }
   export interface Identify {
@@ -37,7 +37,7 @@ export namespace SendPayload {
     ctype: ContentType; // Message Type {0: Text, 1: Image, 2: File, ...}
     data: string;
     time: string; // ISO 8601
-    uid: number; // User ID
+    uid: string; // User ID
     uname: string; // User Name
   }
 

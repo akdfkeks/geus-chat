@@ -36,19 +36,19 @@ export class ConnectionService implements OnModuleInit, OnApplicationShutdown {
     return (await this.channels.sismember('channels', channelId)) === 1; // 1 is true
   }
 
-  public async register(newClient: Socket, userId: number) {
-    const oldClientId = await this.channels.get(userId.toString());
-    if (oldClientId !== newClient.id) await this.clients.set(userId.toString(), newClient.id);
+  public async register(newClient: Socket, userId: string) {
+    const oldClientId = await this.channels.get(userId);
+    if (oldClientId !== newClient.id) await this.clients.set(userId, newClient.id);
     return oldClientId;
   }
 
   public async deregister(client: Socket) {
     if (!client.data.uid) return;
-    const rst = await this.clients.del(client.data.uid.toString());
+    const rst = await this.clients.del(client.data.uid);
     return rst >= 1;
   }
 
-  public async getClientId(userId: number) {
-    return await this.clients.get(userId.toString());
+  public async getClientId(userId: string) {
+    return await this.clients.get(userId);
   }
 }

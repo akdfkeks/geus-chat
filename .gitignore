@@ -37,5 +37,4 @@ lerna-debug.log*
 *.env
 yarn.lock
 
-prisma/migrations
 *.backup
