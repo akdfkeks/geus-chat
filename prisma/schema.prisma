@@ -21,6 +21,7 @@ model gh_User {
   name              String               @db.VarChar(255)
   user_type         String               @db.VarChar(255)
   social_uuid       String?              @db.VarChar(255)
+  avatar_url        String?              @db.VarChar(2047)
   member_in_channel gh_MemberInChannel[]
   social            gh_Social?           @relation(fields: [social_uuid], references: [uuid], onDelete: NoAction, onUpdate: NoAction, map: "FKhw5fuitvi0il1bgo88gu1mrbd")
   gh_ChannelInfo    gh_ChannelInfo[]
@@ -58,6 +59,7 @@ model gh_ChannelInfo {
   owner_id BigInt
   members  gh_MemberInChannel[]
 
+  @@index([owner_id], map: "channel_info_owner_id_fkey")
   @@map("channel_info")
 }
 

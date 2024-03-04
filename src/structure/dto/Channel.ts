@@ -24,6 +24,7 @@ export interface IFindChannelResult {
 export interface IFindChannelMemberResult {
   id: string;
   nickname: string;
+  avatar_url: string;
 }
 
 export interface ICreateMemberInChannelResult {

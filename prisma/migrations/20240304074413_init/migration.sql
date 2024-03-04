@@ -1,6 +1,6 @@
 -- CreateTable
 CREATE TABLE `user` (
-    `user_id` INTEGER NOT NULL AUTO_INCREMENT,
+    `id` BIGINT NOT NULL,
     `created_at` DATETIME(6) NULL,
     `deleted_at` DATETIME(6) NULL,
     `updated_at` DATETIME(6) NULL,
@@ -13,12 +13,13 @@ CREATE TABLE `user` (
     `name` VARCHAR(255) NOT NULL,
     `user_type` VARCHAR(255) NOT NULL,
     `social_uuid` VARCHAR(255) NULL,
+    `avatar_url` VARCHAR(2047) NULL,
 
     UNIQUE INDEX `user_email_key`(`email`),
     UNIQUE INDEX `user_nickname_key`(`nickname`),
     UNIQUE INDEX `user_phone_num_key`(`phone_num`),
     INDEX `user_social_uuid_idx`(`social_uuid`),
-    PRIMARY KEY (`user_id`)
+    PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
@@ -34,8 +35,8 @@ CREATE TABLE `social` (
 -- CreateTable
 CREATE TABLE `member_in_channel` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `channel_id` CHAR(36) NOT NULL,
-    `user_id` INTEGER NOT NULL,
+    `channel_id` BIGINT UNSIGNED NOT NULL,
+    `user_id` BIGINT NOT NULL,
 
     INDEX `member_in_channel_channel_id_fkey`(`channel_id`),
     UNIQUE INDEX `member_in_channel_user_id_channel_id_key`(`user_id`, `channel_id`),
@@ -44,10 +45,12 @@ CREATE TABLE `member_in_channel` (
 
 -- CreateTable
 CREATE TABLE `channel_info` (
-    `id` CHAR(36) NOT NULL,
+    `id` BIGINT UNSIGNED NOT NULL,
     `name` VARCHAR(191) NOT NULL,
-    `owner_id` INTEGER NOT NULL,
+    `icon_url` VARCHAR(2047) NULL,
+    `owner_id` BIGINT NOT NULL,
 
+    INDEX `channel_info_owner_id_fkey`(`owner_id`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -55,9 +58,9 @@ CREATE TABLE `channel_info` (
 CREATE TABLE `channel_token` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `refresh_token` VARCHAR(191) NOT NULL,
-    `user_id` INTEGER NOT NULL,
+    `user_id` BIGINT NOT NULL,
     `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `expires_at` DATETIME NULL,
+    `expire_at` DATETIME NULL,
 
     UNIQUE INDEX `channel_token_refresh_token_key`(`refresh_token`),
     UNIQUE INDEX `channel_token_user_id_key`(`user_id`),
@@ -71,7 +74,7 @@ ALTER TABLE `user` ADD CONSTRAINT `FKhw5fuitvi0il1bgo88gu1mrbd` FOREIGN KEY (`so
 ALTER TABLE `member_in_channel` ADD CONSTRAINT `member_in_channel_channel_id_fkey` FOREIGN KEY (`channel_id`) REFERENCES `channel_info`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `member_in_channel` ADD CONSTRAINT `member_in_channel_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `user`(`user_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `member_in_channel` ADD CONSTRAINT `member_in_channel_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `channel_info` ADD CONSTRAINT `channel_info_owner_id_fkey` FOREIGN KEY (`owner_id`) REFERENCES `user`(`user_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `channel_info` ADD CONSTRAINT `channel_info_owner_id_fkey` FOREIGN KEY (`owner_id`) REFERENCES `user`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;

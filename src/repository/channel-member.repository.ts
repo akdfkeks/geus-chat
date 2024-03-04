@@ -15,7 +15,7 @@ export class ChannelMemberRepository {
             select: {
               id: true,
               nickname: true,
-              user_type: true,
+              avatar_url: true,
             },
           },
         },
@@ -25,6 +25,7 @@ export class ChannelMemberRepository {
           return {
             id: user.id.toString(),
             nickname: user.nickname,
+            avatar_url: user.avatar_url || '',
           } satisfies IFindChannelMemberResult;
         }),
       );
