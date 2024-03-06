@@ -222,11 +222,10 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
     oldClient?.disconnect();
   }
 
-  public async getMessageHistory(user: JWTPayload, param: IChannelIdParam, query: IGetChannelMessageQuery) {
+  public async getMessageHistory(dto: JWTPayload & IChannelIdParam & IGetChannelMessageQuery) {
     Wrapper.TryOrThrow(
       () => {
-        typia.assertEquals<IChannelIdParam>(param);
-        typia.assertEquals<IGetChannelMessageQuery>(query);
+        typia.assertEquals<JWTPayload & IChannelIdParam & IGetChannelMessageQuery>(dto);
       },
       new BadRequestException({
         code: '123-123',
@@ -234,9 +233,9 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
         message: '요청 형식이 올바르지 않습니다.',
       }),
     );
-    const isMemberOfChannel = (await this.memberRepository.findChannelMembers(param.channelId))
+    const isMemberOfChannel = (await this.memberRepository.findChannelMembers(dto.channelId))
       .map(({ id }) => id)
-      .includes(user.uid);
+      .includes(dto.uid);
 
     if (!isMemberOfChannel) {
       throw new UnauthorizedException({
@@ -246,6 +245,10 @@ export class ChannelService implements OnModuleInit, OnModuleDestroy {
       });
     }
 
-    return this.messageRepository.getMessagesByQuery(param.channelId, query);
+    return this.messageRepository.getMessagesByQuery({
+      channelId: dto.channelId,
+      before: dto.before,
+      limit: dto.limit,
+    });
   }
 }
