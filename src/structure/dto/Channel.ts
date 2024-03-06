@@ -9,7 +9,6 @@ export interface ICreateChannelDto {
 }
 
 export interface IGetChannelMessageQuery {
-  after?: string & tags.Pattern<'^[0-9]+$'>;
   before?: string & tags.Pattern<'^[0-9]+$'>;
   limit?: string & tags.Pattern<'^[0-9]+$'>;
 }
