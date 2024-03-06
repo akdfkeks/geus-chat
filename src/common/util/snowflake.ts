@@ -13,6 +13,15 @@ export namespace SnowFlake {
       return SnowFlake.generate();
     }
   };
+
+  /**
+   * Fake snowflake id를 생성합니다.
+   * 반환되는 값은 ID로 사용할 수 없습니다.
+   */
+  export const genFake = (date?: Date) => {
+    return BigInt(date ? date.getTime() : Date.now()) << 22n;
+  };
+
   export const parseDate = (snowflake: number | bigint) => {
     const ms = Number(typeof snowflake === 'bigint' ? snowflake >> 22n : snowflake >> 22);
     return new Date(ms + GEUS_EPOCH);

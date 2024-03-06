@@ -51,3 +51,13 @@ export interface Message<PayloadType = any> {
   op: number & tags.Minimum<0> & tags.Maximum<100>;
   d: PayloadType;
 }
+
+export interface IFindMessageResult {
+  mid: string;
+  cid: string;
+  ctype: number;
+  data: string;
+  time: string;
+  uid: string;
+  uname: string;
+}
