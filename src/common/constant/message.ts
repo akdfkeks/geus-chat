@@ -1,0 +1,1 @@
+export const DEFULT_FIND_MESSAGE_LIMIT = 50;

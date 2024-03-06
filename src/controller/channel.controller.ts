@@ -43,7 +43,7 @@ export class ChannelController {
   ) {
     return {
       channelId: param.channelId,
-      messages: await this.channelService.getMessageHistory(user, param, query),
+      messages: await this.channelService.getMessageHistory({ ...user, ...param, ...query }),
     };
   }
 }

@@ -2,8 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
 import { Db } from 'mongodb';
 import { MESSAGE_HISTORY } from 'src/common/constant/database';
+import { DEFULT_FIND_MESSAGE_LIMIT } from 'src/common/constant/message';
+import { SnowFlake } from 'src/common/util/snowflake';
 import { IGetChannelMessageQuery } from 'src/structure/dto/Channel';
-import { RecvPayload, SendPayload } from 'src/structure/dto/Message';
+import { IFindMessageResult, RecvPayload, SendPayload } from 'src/structure/dto/Message';
 import { MessageSchema } from 'src/structure/model/message';
 
 @Injectable()
@@ -22,43 +24,31 @@ export class MessageRepository {
     });
   }
 
-  public async getMessagesByQuery(channelId: string, query: IGetChannelMessageQuery) {
-    if (!query.after && !query.before) return [];
-
+  public async getMessagesByQuery(query: IGetChannelMessageQuery & { channelId: string }) {
     return this.mongo
       .collection<MessageSchema>(MESSAGE_HISTORY)
-      .find(
-        {
-          _id:
-            query.after && query.before
-              ? {
-                  $gte: BigInt(query.after),
-                  $lte: BigInt(query.before),
-                }
-              : query.before
-                ? { $lte: BigInt(query.before) }
-                : { $gte: BigInt(query.after!) },
-          channel_id: channelId,
+      .find({
+        _id: {
+          // $gte: {{ 사용자가 채팅방에 입장한 시간 }}
+          $lte: query.before ? BigInt(query.before) : SnowFlake.genFake(),
         },
-        {
-          limit: query.after && query.before ? undefined : query.limit ? Number(query.limit) : undefined,
-        },
-      )
-      .sort('_id')
+        channel_id: query.channelId,
+      })
+      .sort('_id', -1)
+      .limit(query.before ? Math.min(+query.before, DEFULT_FIND_MESSAGE_LIMIT) : DEFULT_FIND_MESSAGE_LIMIT)
       .toArray()
       .then((msgs) =>
-        msgs.map(
-          (m) =>
-            ({
-              mid: m._id.toString(10),
-              cid: m.channel_id,
-              ctype: m.message_type,
-              data: m.data,
-              time: m.time,
-              uid: m.user_id,
-              uname: m.user_name,
-            }) satisfies any,
-        ),
+        msgs.map((m) => {
+          return {
+            mid: m._id.toString(10),
+            cid: m.channel_id,
+            ctype: m.message_type,
+            data: m.data,
+            time: m.time,
+            uid: m.user_id,
+            uname: m.user_name,
+          } satisfies IFindMessageResult;
+        }),
       );
   }
 }
