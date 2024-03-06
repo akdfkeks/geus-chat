@@ -6,20 +6,22 @@ export class UserRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   public async findUserById(id: string) {
-    return this.prisma.gh_User.findUniqueOrThrow({
-      where: { id: BigInt(id) },
-    });
+    return this.prisma.gh_User
+      .findUnique({ where: { id: BigInt(id) } })
+      .then((rst) => ({ ...rst, id }))
+      .catch((e) => {
+        throw new NotFoundException({
+          code: '000-000',
+          title: '사용자 조회에 실패했습니다.',
+          message: '존재하지 않는 사용자입니다.',
+        });
+      });
   }
 
   public async findUserByEmail(email: string) {
     return this.prisma.gh_User
-      .findUniqueOrThrow({ where: { email } })
-      .then((rst) => {
-        return { ...rst, id: rst.id.toString() };
-      })
-      .catch((e) => {
-        throw new NotFoundException();
-      });
+      .findUnique({ where: { email } })
+      .then((rst) => (rst ? { ...rst, id: rst.id.toString() } : null));
   }
 
   public async upsertChannelRefreshToken(id: string, refreshToken: string) {
