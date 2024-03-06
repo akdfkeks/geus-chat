@@ -8,10 +8,10 @@ export namespace JWTHelper {
     <PayloadType = any>(token: any) =>
     (secret: string) =>
     (options?: jwt.VerifyOptions) =>
-      jwt.verify(token, secret, options) as PayloadType;
+      jwt.verify(token, secret, options) as PayloadType & { iat: number; exp: number };
 
   export const decode =
     <PayloadType = any>(token: any) =>
     (options?: jwt.DecodeOptions) =>
-      jwt.decode(token) as PayloadType;
+      jwt.decode(token) as PayloadType & { iat: number; exp: number };
 }
