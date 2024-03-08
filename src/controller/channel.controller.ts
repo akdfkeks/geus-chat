@@ -5,6 +5,7 @@ import { JWTPayload } from 'src/structure/dto/Auth';
 import { IChannelIdParam, IGetChannelMessageQuery } from 'src/structure/dto/Channel';
 import { ChannelService } from 'src/service/channel.service';
 import { BadRequestFilter } from 'src/common/filter/BadRequest.filter';
+import { ChannelService } from 'src/service/channel.service';
 
 @UseFilters(BadRequestFilter)
 @UseGuards(UserGuard)
@@ -14,7 +15,7 @@ export class ChannelController {
 
   @Get('/')
   public onChannelListRequest(@ReqUser() user: JWTPayload) {
-    return this.channelService.getJoinedChannels(user);
+    return this.channelService.getJoinedChannels(user.uid);
   }
 
   @Post('/')
