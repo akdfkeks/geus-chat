@@ -6,32 +6,41 @@ import {
   WebSocketServer,
   ConnectedSocket,
   OnGatewayInit,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { GwBadRequestFilter } from 'src/common/filter/GwBadRequest.filter';
 import { GwExceptionFilter } from 'src/common/filter/GwException.filter';
-import { ChannelService } from 'src/service/channel.service';
+import { ChannelGWService } from 'src/service/channel-gw.service';
+import { EventData } from 'src/structure/dto/Event';
 
-@UseFilters(new GwExceptionFilter(), new GwBadRequestFilter())
-@WebSocketGateway({ namespace: 'v2/channel', cors: { origin: '*' } })
-export class ChannelGateway implements OnGatewayInit {
+@UseFilters(GwExceptionFilter, GwBadRequestFilter)
+@WebSocketGateway({ namespace: 'v2/channel', transports: ['websocket'], cors: { origin: '*' } })
+export class ChannelGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   private server: Server;
 
-  constructor(private readonly channelService: ChannelService) {}
+  constructor(private readonly channelService: ChannelGWService) {}
 
   public afterInit(server: Server) {
     this.channelService.server = this.server;
   }
 
-  public async handleConnection(client: Socket) {}
-
-  public async handleDisconnect(client: Socket) {
-    return await this.channelService.handleDisconnect(client);
+  public async handleConnection(client: Socket) {
+    try {
+      await this.channelService.initClient(client);
+    } catch (e) {
+      client.disconnect(true);
+    }
   }
 
-  @SubscribeMessage('message')
-  public async onMessage(@ConnectedSocket() client: Socket, @MessageBody() message: any): Promise<void> {
-    return await this.channelService.handleMessage(this.server, client, message);
+  public async handleDisconnect(client: Socket) {
+    await this.channelService.handleDisconnect(client);
+  }
+
+  @SubscribeMessage('event')
+  public async onEvent(@ConnectedSocket() client: Socket, @MessageBody() evt: EventData): Promise<void> {
+    await this.channelService.handleEvent(client, evt);
   }
 }
