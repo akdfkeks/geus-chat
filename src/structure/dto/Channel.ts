@@ -1,3 +1,4 @@
+import { UserProfile } from 'src/structure/dto/User';
 import { tags } from 'typia';
 
 export interface IChannelIdParam {
@@ -20,11 +21,7 @@ export interface IFindChannelResult {
   owner_id: string;
 }
 
-export interface IFindChannelMemberResult {
-  id: string;
-  nickname: string;
-  avatar_url: string;
-}
+export type IFindChannelMemberResult = UserProfile;
 
 export interface ICreateMemberInChannelResult {
   userId: string;
