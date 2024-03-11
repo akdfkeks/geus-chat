@@ -2,6 +2,7 @@ import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import { Injectable, OnApplicationShutdown, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { Socket } from 'socket.io';
 import Redis from 'ioredis';
+import { isFalsy } from 'src/common/util/utils';
 
 @Injectable()
 export class ConnectionService implements OnModuleInit, OnApplicationShutdown {
@@ -26,6 +27,24 @@ export class ConnectionService implements OnModuleInit, OnApplicationShutdown {
     }
   }
 
+  public async register(client: Socket): Promise<boolean> {
+    if (isFalsy(client.data.user?.id)) return false;
+    try {
+      return (await this.clients.set(client.data.user.id, client.id)) === 'OK';
+    } catch (e) {
+      return false;
+    }
+  }
+
+  public async deregister(client: Socket): Promise<boolean> {
+    if (isFalsy(client.data.user?.id)) return false;
+    try {
+      return (await this.clients.del(client.data.user.id)) >= 1;
+    } catch (e) {
+      return false;
+    }
+  }
+
   public async cacheChannels(channel: string | string[]) {
     const channels = Array.isArray(channel) ? channel : [channel];
     const r = await this.channels.sadd('channels', channels);
@@ -34,18 +53,6 @@ export class ConnectionService implements OnModuleInit, OnApplicationShutdown {
 
   public async isChannelCached(channelId: string) {
     return (await this.channels.sismember('channels', channelId)) === 1; // 1 is true
-  }
-
-  public async register(newClient: Socket, userId: string) {
-    const oldClientId = await this.channels.get(userId);
-    if (oldClientId !== newClient.id) await this.clients.set(userId, newClient.id);
-    return oldClientId;
-  }
-
-  public async deregister(client: Socket) {
-    if (!client.data.uid) return;
-    const rst = await this.clients.del(client.data.uid);
-    return rst >= 1;
   }
 
   public async getClientId(userId: string) {

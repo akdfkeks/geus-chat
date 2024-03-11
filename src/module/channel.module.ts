@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ChannelService } from 'src/service/channel.service';
+import { ChannelGWService } from 'src/service/channel-gw.service';
 import { SocketService } from 'src/service/socket.service';
 import { UserService } from 'src/service/user.service';
 import { AuthService } from 'src/service/auth.service';
@@ -11,6 +11,7 @@ import { ChannelMemberRepository } from 'src/repository/channel-member.repositor
 import { ChannelController } from 'src/controller/channel.controller';
 import { MongoModule } from './mongo.module';
 import { MessageRepository } from 'src/repository/message.repository';
+import { ChannelService } from 'src/service/channel.service';
 
 @Module({
   imports: [MongoModule],
@@ -19,6 +20,7 @@ import { MessageRepository } from 'src/repository/message.repository';
     ChannelGateway,
     SocketService,
     ChannelService,
+    ChannelGWService,
     UserService,
     AuthService,
     UserRepository,

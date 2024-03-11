@@ -3,8 +3,8 @@ import { ReqUser } from 'src/common/decorator/user';
 import { UserGuard } from 'src/common/guard/jwt.guard';
 import { JWTPayload } from 'src/structure/dto/Auth';
 import { IChannelIdParam, IGetChannelMessageQuery } from 'src/structure/dto/Channel';
-import { ChannelService } from 'src/service/channel.service';
 import { BadRequestFilter } from 'src/common/filter/BadRequest.filter';
+import { ChannelService } from 'src/service/channel.service';
 
 @UseFilters(BadRequestFilter)
 @UseGuards(UserGuard)
@@ -14,20 +14,20 @@ export class ChannelController {
 
   @Get('/')
   public onChannelListRequest(@ReqUser() user: JWTPayload) {
-    return this.channelService.getJoinedChannels(user);
+    return this.channelService.getJoinedChannels(user.uid);
   }
 
-  @Post('/')
-  public async onCreateChannelRequest(@ReqUser() user: JWTPayload, @Body() body: any) {
-    const channelId = await this.channelService.createChannel(user, body);
-    return { channelId };
-  }
+  // @Post('/')
+  // public async onCreateChannelRequest(@ReqUser() user: JWTPayload, @Body() body: any) {
+  //   const channelId = await this.channelService.createChannel(user, body);
+  //   return { channelId };
+  // }
 
-  @Get('/:channelId/join')
-  public async onChannelJoinRequest(@ReqUser() user: JWTPayload, @Param() param: any) {
-    const result = await this.channelService.addMemberToChannel(user, param);
-    return result;
-  }
+  // @Get('/:channelId/join')
+  // public async onChannelJoinRequest(@ReqUser() user: JWTPayload, @Param() param: any) {
+  //   const result = await this.channelService.addMemberToChannel(user, param);
+  //   return result;
+  // }
 
   @Get('/:channelId/member')
   public async onChannelMemberListRequest(@Param() param: any) {

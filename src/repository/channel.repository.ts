@@ -1,7 +1,7 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { SnowFlake } from 'src/common/util/snowflake';
 import { PrismaService } from 'src/service/prisma.service';
-import { ICreateMemberInChannelResult, IFindChannelResult } from 'src/structure/dto/Channel';
+import { ICreateMemberInChannelResult, IFindChannelMemberResult, IFindChannelResult } from 'src/structure/dto/Channel';
 
 @Injectable()
 export class ChannelRepository {
@@ -45,7 +45,7 @@ export class ChannelRepository {
       });
   }
 
-  public async getJoinedChannelsIdByUserId(userId: string) {
+  public async findJoinedChannelsIdByUserId(userId: string) {
     return this.prisma.gh_MemberInChannel
       .findMany({
         where: { user_id: BigInt(userId) },
@@ -56,7 +56,7 @@ export class ChannelRepository {
       });
   }
 
-  public async getJoinedChannelListByUserId(
+  public async findJoinedChannelsByUserId(
     userId: string,
   ): Promise<Array<Pick<IFindChannelResult, 'id' | 'name' | 'icon_url'>>> {
     return this.prisma.gh_MemberInChannel
@@ -88,5 +88,30 @@ export class ChannelRepository {
           channelId: channelId,
         };
       });
+  }
+
+  public async findChannelMembers(channelId: string) {
+    return this.prisma.gh_MemberInChannel
+      .findMany({
+        where: { channel_id: BigInt(channelId) },
+        include: {
+          user: {
+            select: {
+              id: true,
+              nickname: true,
+              avatar_url: true,
+            },
+          },
+        },
+      })
+      .then((rst) =>
+        rst.map(({ user }) => {
+          return {
+            id: user.id.toString(),
+            name: user.nickname,
+            avatar_url: user.avatar_url || '',
+          } satisfies IFindChannelMemberResult;
+        }),
+      );
   }
 }
