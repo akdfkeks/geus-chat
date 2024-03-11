@@ -21,7 +21,7 @@ export interface IFindChannelResult {
   owner_id: string;
 }
 
-export type IFindChannelMemberResult = UserProfile;
+export type IFindChannelMemberResult = UserProfile & { role: number };
 
 export interface ICreateMemberInChannelResult {
   userId: string;

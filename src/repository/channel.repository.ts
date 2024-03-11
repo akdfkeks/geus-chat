@@ -80,7 +80,7 @@ export class ChannelRepository {
       .upsert({
         where: { user_id_channel_id: { user_id: BigInt(userId), channel_id: BigInt(channelId) } },
         update: {},
-        create: { user_id: BigInt(userId), channel_id: BigInt(channelId) },
+        create: { user_id: BigInt(userId), channel_id: BigInt(channelId), user_role: UserRole.GUEST },
       })
       .then((rst) => {
         return {
@@ -105,9 +105,10 @@ export class ChannelRepository {
         },
       })
       .then((rst) =>
-        rst.map(({ user }) => {
+        rst.map(({ user, user_role }) => {
           return {
             id: user.id.toString(),
+            role: user_role,
             name: user.nickname,
             avatar_url: user.avatar_url || '',
           } satisfies IFindChannelMemberResult;
