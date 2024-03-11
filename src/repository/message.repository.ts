@@ -12,16 +12,7 @@ import { MessageSchema } from 'src/structure/model/message';
 export class MessageRepository {
   constructor(@InjectConnection() private readonly mongo: Db) {}
 
-  public async saveMessage(m: SendPayload.Content) {
-    return await this.mongo.collection<MessageSchema>(MESSAGE_HISTORY).insertOne({
-      _id: m.mid,
-      channel_id: m.cid,
-      message_type: m.ctype,
-      data: m.data,
-      time: m.time,
-      user_id: m.uid,
-      user_name: m.uname,
-    });
+      .then((v) => Message.toSendDto(msg));
   }
 
   public async getMessagesByQuery(query: IGetChannelMessageQuery & { channelId: string }) {
@@ -37,18 +28,6 @@ export class MessageRepository {
       .sort('_id', -1)
       .limit(query.before ? Math.min(+query.before, DEFULT_FIND_MESSAGE_LIMIT) : DEFULT_FIND_MESSAGE_LIMIT)
       .toArray()
-      .then((msgs) =>
-        msgs.map((m) => {
-          return {
-            mid: m._id.toString(10),
-            cid: m.channel_id,
-            ctype: m.message_type,
-            data: m.data,
-            time: m.time,
-            uid: m.user_id,
-            uname: m.user_name,
-          } satisfies IFindMessageResult;
-        }),
-      );
+      .then((msgs) => msgs.map(Message.toSendDto));
   }
 }
