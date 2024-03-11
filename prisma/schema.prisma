@@ -45,6 +45,7 @@ model gh_MemberInChannel {
   channel_id BigInt         @db.UnsignedBigInt
   user       gh_User        @relation(fields: [user_id], references: [id])
   user_id    BigInt
+  user_role  Int            @default(0) @db.UnsignedTinyInt
 
   @@unique([user_id, channel_id])
   @@index([channel_id], map: "member_in_channel_channel_id_fkey")
