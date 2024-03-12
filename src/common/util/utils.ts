@@ -18,3 +18,11 @@ export const isTruthy = (input: unknown): boolean => {
 export const isFalsy = (input: unknown): boolean => {
   return !isTruthy(input);
 };
+
+export const isUndefined = (input: unknown): boolean => {
+  return typeof input === 'undefined';
+};
+
+export const isNil = (input: unknown): boolean => {
+  return isUndefined(input) || input === null;
+};

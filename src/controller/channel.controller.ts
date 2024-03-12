@@ -1,10 +1,20 @@
-import { Body, Controller, Get, Param, Post, Query, UseFilters, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  DefaultValuePipe as DefaultValue,
+  Get,
+  Param,
+  ParseIntPipe,
+  Query,
+  UseFilters,
+  UseGuards,
+} from '@nestjs/common';
 import { ReqUser } from 'src/common/decorator/user';
 import { UserGuard } from 'src/common/guard/jwt.guard';
-import { JWTPayload } from 'src/structure/dto/Auth';
-import { IChannelIdParam, IGetChannelMessageQuery } from 'src/structure/dto/Channel';
 import { BadRequestFilter } from 'src/common/filter/BadRequest.filter';
 import { ChannelService } from 'src/service/channel.service';
+import { SnowFlake } from 'src/common/util/snowflake';
+import { ParseBigIntPipe } from 'src/common/pipe/parse-bigint.pipe';
+import { DEFAULT_FIND_MESSAGE_LIMIT as FIND_MESSAGE_LIMIT } from 'src/common/constant/message';
 
 @UseFilters(BadRequestFilter)
 @UseGuards(UserGuard)
@@ -13,8 +23,8 @@ export class ChannelController {
   constructor(private readonly channelService: ChannelService) {}
 
   @Get('/')
-  public onChannelListRequest(@ReqUser() user: JWTPayload) {
-    return this.channelService.getJoinedChannels(user.uid);
+  public onChannelListRequest(@ReqUser() userId: bigint) {
+    return this.channelService.getJoinedChannels(userId);
   }
 
   // @Post('/')
@@ -30,20 +40,21 @@ export class ChannelController {
   // }
 
   @Get('/:channelId/member')
-  public async onChannelMemberListRequest(@Param() param: any) {
-    const result = await this.channelService.getChannelMembers(param);
+  public async onChannelMemberListRequest(@Param('channelId', ParseBigIntPipe) channelId: bigint) {
+    const result = await this.channelService.getChannelMembers(channelId);
     return { members: result };
   }
 
   @Get('/:channelId/message')
   public async onChannelMessageRequest(
-    @ReqUser() user: JWTPayload,
-    @Param() param: IChannelIdParam,
-    @Query() query: IGetChannelMessageQuery,
+    @ReqUser() userId: bigint,
+    @Param('channelId', ParseBigIntPipe) channelId: bigint,
+    @Query('before', new DefaultValue(SnowFlake.genFake()), ParseBigIntPipe) before: bigint,
+    @Query('limit', new DefaultValue(FIND_MESSAGE_LIMIT), ParseIntPipe) limit: number,
   ) {
     return {
-      channelId: param.channelId,
-      messages: await this.channelService.getMessageHistory({ ...user, ...param, ...query }),
+      channelId: channelId.toString(),
+      messages: await this.channelService.getMessageHistory({ userId, channelId, before, limit }),
     };
   }
 }

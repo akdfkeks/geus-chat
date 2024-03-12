@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
 import { Db } from 'mongodb';
 import { MESSAGE_HISTORY } from 'src/common/constant/database';
-import { DEFULT_FIND_MESSAGE_LIMIT } from 'src/common/constant/message';
+import { DEFAULT_FIND_MESSAGE_LIMIT } from 'src/common/constant/message';
 import { SnowFlake } from 'src/common/util/snowflake';
 import { IGetChannelMessageQuery } from 'src/structure/dto/Channel';
 import { Message } from 'src/structure/message';
@@ -19,20 +19,16 @@ export class MessageRepository {
       .then((v) => Message.toSendDto(msg));
   }
 
-  public async getMessagesByQuery(query: IGetChannelMessageQuery & { channelId: string }) {
+  public async getMessagesByQuery(query: { channelId: bigint; before: bigint; limit: number }) {
     return this.mongo
       .collection<Message.Model>(MESSAGE_HISTORY)
       .find({
-        _id: {
-          $lte: query.before ? BigInt(query.before) : SnowFlake.genFake(),
-        },
-        // time: {
-        // 	$gte: // 채팅방에 입장한 시간
-        // },
+        _id: { $lte: query.before },
+        // time: { $gte: 채팅방에 입장한 시간 },
         channel_id: query.channelId,
       })
       .sort('_id', -1)
-      .limit(query.before ? Math.min(Math.abs(+query.before), DEFULT_FIND_MESSAGE_LIMIT) : DEFULT_FIND_MESSAGE_LIMIT)
+      .limit(query.limit)
       .toArray()
       .then((msgs) => msgs.map(Message.toSendDto));
   }

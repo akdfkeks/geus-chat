@@ -1,4 +1,4 @@
-export const DEFULT_FIND_MESSAGE_LIMIT = 100;
+export const DEFAULT_FIND_MESSAGE_LIMIT = 100;
 
 export const SendOP = {
   DISPATCH_MESSAGE: 0,
