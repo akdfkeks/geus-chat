@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
 import { Db } from 'mongodb';
 import { MESSAGE_HISTORY } from 'src/common/constant/database';
-import { DEFULT_FIND_MESSAGE_LIMIT } from 'src/common/constant/message';
+import { DEFAULT_FIND_MESSAGE_LIMIT } from 'src/common/constant/message';
 import { SnowFlake } from 'src/common/util/snowflake';
 import { IGetChannelMessageQuery } from 'src/structure/dto/Channel';
 import { Message } from 'src/structure/message';
@@ -32,7 +32,7 @@ export class MessageRepository {
         channel_id: query.channelId,
       })
       .sort('_id', -1)
-      .limit(query.before ? Math.min(Math.abs(+query.before), DEFULT_FIND_MESSAGE_LIMIT) : DEFULT_FIND_MESSAGE_LIMIT)
+      .limit(query.before ? Math.min(Math.abs(+query.before), DEFAULT_FIND_MESSAGE_LIMIT) : DEFAULT_FIND_MESSAGE_LIMIT)
       .toArray()
       .then((msgs) => msgs.map(Message.toSendDto));
   }
