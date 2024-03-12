@@ -19,20 +19,16 @@ export class MessageRepository {
       .then((v) => Message.toSendDto(msg));
   }
 
-  public async getMessagesByQuery(query: IGetChannelMessageQuery & { channelId: string }) {
+  public async getMessagesByQuery(query: { channelId: bigint; before: bigint; limit: number }) {
     return this.mongo
       .collection<Message.Model>(MESSAGE_HISTORY)
       .find({
-        _id: {
-          $lte: query.before ? BigInt(query.before) : SnowFlake.genFake(),
-        },
-        // time: {
-        // 	$gte: // 채팅방에 입장한 시간
-        // },
+        _id: { $lte: query.before },
+        // time: { $gte: 채팅방에 입장한 시간 },
         channel_id: query.channelId,
       })
       .sort('_id', -1)
-      .limit(query.before ? Math.min(Math.abs(+query.before), DEFAULT_FIND_MESSAGE_LIMIT) : DEFAULT_FIND_MESSAGE_LIMIT)
+      .limit(query.limit)
       .toArray()
       .then((msgs) => msgs.map(Message.toSendDto));
   }

@@ -57,10 +57,10 @@ export class ChannelRepository {
       });
   }
 
-  public async findJoinedChannelsByUserId(userId: string) {
+  public async findJoinedChannelsByUserId(userId: bigint) {
     return this.prisma.gh_MemberInChannel
       .findMany({
-        where: { user_id: BigInt(userId) },
+        where: { user_id: userId },
         include: { channel: { include: { _count: { select: { members: true } } } } },
       })
       .then((rst) =>
@@ -90,10 +90,10 @@ export class ChannelRepository {
       });
   }
 
-  public async findChannelMembers(channelId: string) {
+  public async findChannelMembers(channelId: bigint) {
     return this.prisma.gh_MemberInChannel
       .findMany({
-        where: { channel_id: BigInt(channelId) },
+        where: { channel_id: channelId },
         include: {
           user: {
             select: {
