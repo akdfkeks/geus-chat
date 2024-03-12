@@ -1,6 +1,7 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { SnowFlake } from 'src/common/util/snowflake';
 import { PrismaService } from 'src/service/prisma.service';
+import { Channel } from 'src/structure/channel';
 import { ICreateMemberInChannelResult, IFindChannelMemberResult, IFindChannelResult } from 'src/structure/dto/Channel';
 
 @Injectable()
@@ -56,13 +57,11 @@ export class ChannelRepository {
       });
   }
 
-  public async findJoinedChannelsByUserId(
-    userId: string,
-  ): Promise<Array<Pick<IFindChannelResult, 'id' | 'name' | 'icon_url'>>> {
+  public async findJoinedChannelsByUserId(userId: string) {
     return this.prisma.gh_MemberInChannel
       .findMany({
         where: { user_id: BigInt(userId) },
-        include: { channel: true },
+        include: { channel: { include: { _count: { select: { members: true } } } } },
       })
       .then((rst) =>
         rst.map((c) => {
@@ -70,7 +69,8 @@ export class ChannelRepository {
             id: c.channel_id.toString(),
             name: c.channel.name,
             icon_url: '',
-          };
+            member_count: c.channel._count.members,
+          } satisfies Channel.DetailDto;
         }),
       );
   }
