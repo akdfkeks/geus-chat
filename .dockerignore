@@ -2,3 +2,9 @@
 node_modules/
 dist/
 test/
+logs/
+.eslintrc.js
+.gitignore
+.prettierrc
+*.bat
+docker-compose.yml
