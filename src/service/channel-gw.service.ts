@@ -63,30 +63,25 @@ export class ChannelGWService implements OnModuleInit, OnModuleDestroy {
   }
 
   public async handleEvent(client: Socket, event: EventData) {
+    Wrapper.TryOrThrow(() => typia.assertEquals<EventData>(event), new GatewayException(error.INVALID_FORMAT));
+
     switch (event.op) {
       case RecvOP.SEND_MESSAGE: {
-        return this.broadcast(client, event);
+        return this.broadcast(client, event.d);
       }
       default:
         return;
     }
   }
 
-  public async broadcast(client: Socket, event: EventData) {
-    if (!this.isAuthorized(client)) {
-      throw new GatewayException(error.CLIENT_NOT_IDENTIFIED);
-    }
+  public async broadcast(client: Socket, data: Message.RecvDto) {
+    Wrapper.TryOrThrow(() => typia.assertEquals<Message.RecvDto>(data), new GatewayException(error.INVALID_FORMAT));
 
-    if (!client.rooms.has(event.d.cid)) {
+    if (!client.rooms.has(data.cid)) {
       throw new GatewayException(error.NO_PERMISSION);
     }
 
-    Wrapper.TryOrThrow(
-      () => typia.assertEquals<EventData<Message.RecvDto>>(event),
-      new GatewayException(error.INVALID_FORMAT),
-    );
-
-    return this.dispatch(client, event);
+    return this.dispatch(client, data);
   }
 
   private async authenticate(client: Socket) {
@@ -115,10 +110,10 @@ export class ChannelGWService implements OnModuleInit, OnModuleDestroy {
     await client.join(channels);
   }
 
-  private async dispatch(client: Socket, event: EventData<Message.RecvDto>) {
-    const message = await this.messageRepo.saveMessage({ ...event.d, uid: client.data.user.id });
+  private async dispatch(client: Socket, data: Message.RecvDto) {
+    const message = await this.messageRepo.saveMessage({ ...data, uid: client.data.user.id });
 
-    this.server.to(event.d.cid).emit('message', { op: SendOP.DISPATCH_MESSAGE, d: message });
+    this.server.to(data.cid).emit('message', { op: SendOP.DISPATCH_MESSAGE, d: message });
     return;
   }
 }
