@@ -53,7 +53,7 @@ export class ChannelController {
     @Query('limit', new DefaultValue(FIND_MESSAGE_LIMIT), ParseIntPipe) limit: number,
   ) {
     return {
-      channelId: channelId.toString(),
+      channelId: channelId,
       messages: await this.channelService.getMessageHistory({ userId, channelId, before, limit }),
     };
   }

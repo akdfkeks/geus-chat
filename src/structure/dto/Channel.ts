@@ -15,10 +15,10 @@ export interface IGetChannelMessageQuery {
 }
 
 export interface IFindChannelResult {
-  id: string;
+  id: bigint;
   name: string;
   icon_url: string;
-  owner_id: string;
+  owner_id: bigint;
 }
 
 export type IFindChannelMemberResult = UserProfile & { role: number };

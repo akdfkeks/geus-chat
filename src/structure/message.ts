@@ -17,12 +17,12 @@ export namespace Message {
   }
 
   export interface SendDto {
-    mid: string; // Message ID
-    cid: string; // Channel ID
+    mid: bigint; // Message ID
+    cid: bigint; // Channel ID
     ctype: number; // Message Type {0: Text, 1: Image, 2: File, ...}
     data: string;
     time: string; // ISO 8601
-    uid: string;
+    uid: bigint;
   }
 
   export const toModel = (dto: Message.RecvDto & { uid: string }): Message.Model => {
@@ -38,12 +38,12 @@ export namespace Message {
 
   export const toSendDto = (model: Message.Model): Message.SendDto => {
     return {
-      mid: model._id.toString(),
-      cid: model.channel_id.toString(),
+      mid: model._id,
+      cid: model.channel_id,
       ctype: model.content_type,
       data: model.data,
       time: model.time.toISOString(),
-      uid: model.author_id.toString(),
+      uid: model.author_id,
     };
   };
 }
