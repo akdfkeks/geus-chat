@@ -34,6 +34,6 @@ export class ChannelService {
   }
 
   private async isMemberOfChannel(userId: bigint, channelId: bigint) {
-    return (await this.channelRepository.findChannelMembers(channelId)).map(({ id }) => id).includes(userId.toString());
+    return (await this.channelRepository.findChannelMembers(channelId)).map(({ id }) => id).includes(userId);
   }
 }

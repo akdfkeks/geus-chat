@@ -13,10 +13,10 @@ export class ChannelRepository {
       .findUniqueOrThrow({ where: { id: BigInt(channelId) } })
       .then((rst) => {
         return {
-          id: rst.id.toString(),
+          id: rst.id,
           name: rst.name,
           icon_url: rst.icon_url || '',
-          owner_id: rst.owner_id.toString(),
+          owner_id: rst.owner_id,
         };
       })
       .catch((e) => {
@@ -40,7 +40,7 @@ export class ChannelRepository {
       })
       .then((rst) => {
         return {
-          id: rst.id.toString(),
+          id: rst.id,
           name: rst.name,
         };
       });
@@ -66,7 +66,7 @@ export class ChannelRepository {
       .then((rst) =>
         rst.map((c) => {
           return {
-            id: c.channel_id.toString(),
+            id: c.channel_id,
             name: c.channel.name,
             icon_url: '',
             member_count: c.channel._count.members,
@@ -107,7 +107,7 @@ export class ChannelRepository {
       .then((rst) =>
         rst.map(({ user, user_role }) => {
           return {
-            id: user.id.toString(),
+            id: user.id,
             role: user_role,
             name: user.nickname,
             avatar_url: user.avatar_url || '',
