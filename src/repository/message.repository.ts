@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
-import { Db } from 'mongodb';
+import { Db, Long } from 'mongodb';
 import { MESSAGE_HISTORY } from 'src/common/constant/database';
 import { DEFAULT_FIND_MESSAGE_LIMIT } from 'src/common/constant/message';
 import { SnowFlake } from 'src/common/util/snowflake';
@@ -23,9 +23,9 @@ export class MessageRepository {
     return this.mongo
       .collection<Message.Model>(MESSAGE_HISTORY)
       .find({
-        _id: { $lte: query.before },
+        _id: { $lte: Long.fromBigInt(query.before) },
         // time: { $gte: 채팅방에 입장한 시간 },
-        channel_id: query.channelId,
+        channel_id: Long.fromBigInt(query.channelId),
       })
       .sort('_id', -1)
       .limit(query.limit)

@@ -1,14 +1,15 @@
+import { Long } from 'mongodb';
 import { SnowFlake } from 'src/common/util/snowflake';
 import { tags } from 'typia';
 
 export namespace Message {
   export interface Model {
-    _id: bigint;
-    channel_id: bigint;
+    _id: Long;
+    channel_id: Long;
     content_type: number;
     data: string;
     time: Date;
-    author_id: bigint;
+    author_id: Long;
   }
 
   export interface RecvDto {
@@ -27,23 +28,24 @@ export namespace Message {
 
   export const toModel = (dto: Message.RecvDto & { uid: string }): Message.Model => {
     return {
-      _id: SnowFlake.generate(),
-      channel_id: BigInt(dto.cid),
+      // _id: new Long(SnowFlake.generate(), true),
+      _id: Long.fromBigInt(SnowFlake.generate(), true),
+      channel_id: Long.fromString(dto.cid, true, 10),
       content_type: 0, // temp.
       data: dto.data,
       time: new Date(),
-      author_id: BigInt(dto.uid),
+      author_id: Long.fromString(dto.uid, true, 10),
     };
   };
 
   export const toSendDto = (model: Message.Model): Message.SendDto => {
     return {
-      mid: model._id,
-      cid: model.channel_id,
+      mid: model._id.toBigInt(),
+      cid: model.channel_id.toBigInt(),
       ctype: model.content_type,
       data: model.data,
       time: model.time.toISOString(),
-      uid: model.author_id,
+      uid: model.author_id.toBigInt(),
     };
   };
 }
