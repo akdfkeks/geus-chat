@@ -50,15 +50,20 @@ geus-chat은 게스트하우스 숙박 플랫폼 GEUS 의 예약자간 단체 �
 ### Installation
 
 ```bash
+# MySQL
+mysql> create database geus;
+
+# Shell
 $ yarn install
-$ yarn prisma migrate dev --name init
+$ yarn prisma migrate deploy
 ```
 
-### Set env file {dev|prod}.env
+### Set env file {local|dev|prod}.env
+
+프로젝트 최상위 경로에 실행환경에 맞는 env 파일을 생성하고 아래의 값을 설정합니다.
 
 ```properties
 NODE_PORT=
-SOCKET_PORT=
 REDIS_HOST=
 REDIS_PORT=
 DATABASE_URL=
@@ -68,10 +73,13 @@ MONGODB_URL=
 ### Running the app
 
 ```bash
-# development (with watch mode)
-$ yarn start:dev
+# in local (with watch mode)
+$ yarn start:local
 
-# production mode
+# for dev server
+$ yarn build && yarn start:dev
+
+# for prod server
 $ yarn build && yarn start:prod
 ```
 
