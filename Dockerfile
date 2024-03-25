@@ -26,4 +26,4 @@ COPY --from=builder /app/prisma ./prisma
 # COPY --from=builder /app/*.env ./
 
 EXPOSE 3000
-CMD ["yarn", "run", "start:prod"]
+CMD ["yarn", "run", "start:dev"]
