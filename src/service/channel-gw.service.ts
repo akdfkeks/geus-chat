@@ -8,7 +8,7 @@ import typia from 'typia';
 import { ConnectionService } from './connection.service';
 import { MessageRepository } from 'src/repository/message.repository';
 import { LoggerService } from 'src/module/winston.module';
-import { isFalsy, isTruthy } from 'src/common/util/utils';
+import { isFalsy, isNil, isTruthy } from 'src/common/util/utils';
 import { Wrapper } from 'src/common/util/wrapper';
 import { ChannelRepository } from 'src/repository/channel.repository';
 import { UserRepository } from 'src/repository/user.repository';
@@ -86,7 +86,7 @@ export class ChannelGWService implements OnModuleInit, OnModuleDestroy {
 
   private async authenticate(client: Socket) {
     const auth = client.handshake.headers.authorization;
-    if (isFalsy(auth)) return false;
+    if (isNil(auth)) return false;
 
     const bearer = auth!.split('Bearer ')[1];
     if (isFalsy(bearer)) return false;

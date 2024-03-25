@@ -2,7 +2,7 @@ import { InjectRedis } from '@liaoliaots/nestjs-redis';
 import { Injectable, OnApplicationShutdown, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { Socket } from 'socket.io';
 import Redis from 'ioredis';
-import { isFalsy } from 'src/common/util/utils';
+import { isFalsy, isNil } from 'src/common/util/utils';
 
 @Injectable()
 export class ConnectionService implements OnModuleInit, OnApplicationShutdown {
@@ -28,7 +28,7 @@ export class ConnectionService implements OnModuleInit, OnApplicationShutdown {
   }
 
   public async register(client: Socket): Promise<boolean> {
-    if (isFalsy(client.data.user?.id)) return false;
+    if (isNil(client.data.user?.id)) return false;
     try {
       return (await this.clients.set(client.data.user.id, client.id)) === 'OK';
     } catch (e) {
@@ -37,7 +37,7 @@ export class ConnectionService implements OnModuleInit, OnApplicationShutdown {
   }
 
   public async deregister(client: Socket): Promise<boolean> {
-    if (isFalsy(client.data.user?.id)) return false;
+    if (isNil(client.data.user?.id)) return false;
     try {
       return (await this.clients.del(client.data.user.id)) >= 1;
     } catch (e) {
