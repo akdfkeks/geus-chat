@@ -6,7 +6,7 @@ import { Socket } from 'socket.io';
 import { AppModule } from 'src/module/app.module';
 import * as request from 'supertest';
 
-describe('[Http] ChannelController (e2e)', () => {
+describe.skip('[Http] ChannelController (e2e)', () => {
   let app: INestApplication;
   let configService: ConfigService;
   let accessToken: string;

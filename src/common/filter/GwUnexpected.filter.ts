@@ -8,7 +8,7 @@ export class GwUnexpectExceptionFilter extends BaseWsExceptionFilter {
   catch(exception: any, host: ArgumentsHost) {
     // log(exception);
     const clientSocket = host.switchToWs().getClient<Socket>();
-    clientSocket.send({
+    clientSocket.emit('event', {
       op: SendOP.ERROR,
       d: {
         code: 5000,
