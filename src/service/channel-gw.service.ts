@@ -40,19 +40,19 @@ export class ChannelGWService implements OnModuleInit, OnModuleDestroy {
      * Catch 할 수 없으므로 예외를 발생시키지 않고 처리
      */
     if (isAuthFailed) {
-      client.send(EVENT.CLIENT_AUTH_FAILED);
+      client.emit('event', EVENT.CLIENT_AUTH_FAILED);
       client.disconnect(true);
       return;
     }
 
     Promise.all([this.connectionService.register(client), this.initClientChannel(client)])
       .then(() => {
-        client.send(EventUtil.createHello(client.data.user.id));
+        client.emit('event', EventUtil.createHello(client.data.user.id));
         return;
       })
       .catch((e) => {
         this.logger.log(LogLevel.ERROR, e);
-        client.send(EVENT.CLIENT_REG_FAILED);
+        client.emit('event', EVENT.CLIENT_REG_FAILED);
         client.disconnect(true);
         return;
       });
@@ -113,7 +113,7 @@ export class ChannelGWService implements OnModuleInit, OnModuleDestroy {
   private async dispatch(client: Socket, data: Message.RecvDto) {
     const message = await this.messageRepo.saveMessage({ ...data, uid: client.data.user.id });
 
-    this.server.to(data.cid).emit('message', { op: SendOP.DISPATCH_MESSAGE, d: message });
+    this.server.to(data.cid).emit('event', { op: SendOP.DISPATCH_MESSAGE, d: message });
     return;
   }
 }

@@ -7,7 +7,7 @@ import { SendOP } from 'src/common/constant/message';
 export class GwExceptionFilter extends BaseWsExceptionFilter {
   catch(exception: any, host: ArgumentsHost) {
     const clientSocket = host.switchToWs().getClient<Socket>();
-    clientSocket.send({
+    clientSocket.emit('event', {
       op: SendOP.ERROR,
       d: {
         code: exception.code || 5000,

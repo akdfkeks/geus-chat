@@ -10,6 +10,7 @@ import { SnowFlake } from 'src/common/util/snowflake';
 import { RecvOP, SendOP } from 'src/common/constant/message';
 import { Message } from 'src/structure/message';
 import { TestClient, getChannels, getToken } from 'test/common/Client';
+import { BigIntSerializer } from 'src/common/interceptor/bigint-serializer';
 
 describe('[Socket] ChannelGateway (e2e)', () => {
   let app: INestApplication;
@@ -33,6 +34,7 @@ describe('[Socket] ChannelGateway (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
     app.useWebSocketAdapter(new RedisIoAdapter(app));
+    app.useGlobalInterceptors(new BigIntSerializer());
 
     configService = app.get(ConfigService);
 
@@ -69,7 +71,7 @@ describe('[Socket] ChannelGateway (e2e)', () => {
       const client = TestClient(`${baseURL}/v2/channel`, { autoConnect: false });
       return new Promise<void>((res, rej) => {
         client.connect();
-        client.on('message', (data: any) => {
+        client.on('event', (data: any) => {
           if (data.op !== SendOP.ERROR) return;
           expect(data.d.code).toBe(error.INVALID_FORMAT.code);
           client.disconnect();
@@ -82,7 +84,7 @@ describe('[Socket] ChannelGateway (e2e)', () => {
       const client = TestClient(`${baseURL}/v2/channel`, { auth: senderAccess, autoConnect: false });
       return new Promise<void>((res, rej) => {
         client.connect();
-        client.on('message', (data: any) => {
+        client.on('event', (data: any) => {
           if (data.op !== SendOP.HELLO) return;
           expect(data.d.id).toBeDefined();
           client.disconnect();
@@ -103,7 +105,7 @@ describe('[Socket] ChannelGateway (e2e)', () => {
           },
         } satisfies EventData<Message.RecvDto>);
 
-        sender.on('message', (data: any) => {
+        sender.on('event', (data: any) => {
           if (data.op !== SendOP.ERROR) return;
           if (data.d.code === error.NO_PERMISSION.code) {
             res();
@@ -123,7 +125,7 @@ describe('[Socket] ChannelGateway (e2e)', () => {
 
       return new Promise<void>((res, rej) => {
         sender.emit('event', testMessage);
-        sender.on('message', (data: any) => {
+        sender.on('event', (data: any) => {
           if (data.op !== SendOP.DISPATCH_MESSAGE) return;
           expect(data.d.cid).toBeDefined();
           expect(data.d.data).toBeDefined();
