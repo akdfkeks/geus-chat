@@ -7,13 +7,15 @@ import { AuthService } from './auth.service';
 import typia from 'typia';
 import { ConnectionService } from './connection.service';
 import { MessageRepository } from 'src/repository/message.repository';
-import { LoggerService } from 'src/module/winston.module';
-import { isFalsy, isTruthy } from 'src/common/util/utils';
+import { LogLevel, LoggerService } from 'src/module/winston.module';
+import { isFalsy, isNil, isTruthy } from 'src/common/util/utils';
 import { Wrapper } from 'src/common/util/wrapper';
 import { ChannelRepository } from 'src/repository/channel.repository';
 import { UserRepository } from 'src/repository/user.repository';
 import { SendOP, RecvOP } from 'src/common/constant/message';
 import { Message } from 'src/structure/message';
+import * as EVENT from 'src/common/constant/event';
+import { EventUtil } from 'src/common/util/event.util';
 
 @Injectable()
 export class ChannelGWService implements OnModuleInit, OnModuleDestroy {
@@ -32,27 +34,25 @@ export class ChannelGWService implements OnModuleInit, OnModuleDestroy {
   public async onModuleDestroy() {}
 
   public async initClient(client: Socket) {
-    if (!(await this.authenticate(client))) {
-      client.send({
-        op: SendOP.ERROR,
-        d: { code: 4000, message: 'User authentication failed.' },
-      });
+    const isAuthFailed = !(await this.tryAuthenticate(client));
+    /**
+     * handleConnection에서 발생하는 예외는 Exception Filter에서
+     * Catch 할 수 없으므로 예외를 발생시키지 않고 처리
+     */
+    if (isAuthFailed) {
+      client.send(EVENT.CLIENT_AUTH_FAILED);
       client.disconnect(true);
       return;
     }
 
     Promise.all([this.connectionService.register(client), this.initClientChannel(client)])
       .then(() => {
-        client.send({
-          op: SendOP.HELLO,
-          d: { id: client.data.user.id },
-        });
+        client.send(EventUtil.createHello(client.data.user.id));
+        return;
       })
       .catch((e) => {
-        client.send({
-          op: SendOP.ERROR,
-          d: { code: 4000, message: 'User registeration failed.' },
-        });
+        this.logger.log(LogLevel.ERROR, e);
+        client.send(EVENT.CLIENT_REG_FAILED);
         client.disconnect(true);
         return;
       });
@@ -84,9 +84,9 @@ export class ChannelGWService implements OnModuleInit, OnModuleDestroy {
     return this.dispatch(client, data);
   }
 
-  private async authenticate(client: Socket) {
+  private async tryAuthenticate(client: Socket) {
     const auth = client.handshake.headers.authorization;
-    if (isFalsy(auth)) return false;
+    if (isNil(auth)) return false;
 
     const bearer = auth!.split('Bearer ')[1];
     if (isFalsy(bearer)) return false;
