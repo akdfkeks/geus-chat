@@ -1,7 +1,14 @@
 import { PrismaClient } from '@prisma/client';
 import { SnowFlake } from '../src/common/util/snowflake';
+import { config } from 'dotenv';
 
-const prisma = new PrismaClient();
+config({ path: `${process.env.NODE_ENV}.env` });
+
+const prisma = new PrismaClient({
+  datasources: {
+    db: { url: process.env.DATABASE_URL },
+  },
+});
 
 async function main() {
   const userNames = ['alice', 'bob', 'joi'];
