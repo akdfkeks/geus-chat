@@ -17,7 +17,12 @@ export class ChannelService {
     return this.channelRepository.findChannelMembers(channelId);
   }
 
-  public async getMessageHistory(dto: { userId: bigint; channelId: bigint; before: bigint; limit: number }) {
+  public async getMessageHistory(dto: {
+    userId: bigint;
+    channelId: bigint;
+    before: bigint;
+    limit: number;
+  }) {
     if (!this.isMemberOfChannel(dto.userId, dto.channelId)) {
       throw new UnauthorizedException({
         code: '123-123',
@@ -34,6 +39,8 @@ export class ChannelService {
   }
 
   private async isMemberOfChannel(userId: bigint, channelId: bigint) {
-    return (await this.channelRepository.findChannelMembers(channelId)).map(({ id }) => id).includes(userId);
+    return (await this.channelRepository.findChannelMembers(channelId))
+      .map(({ id }) => id)
+      .includes(userId);
   }
 }
