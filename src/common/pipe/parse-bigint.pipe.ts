@@ -10,6 +10,8 @@ export class ParseBigIntPipe implements PipeTransform {
   }
 
   protected isParsable(value: any) {
-    return ['string', 'number', 'bigint'].includes(typeof value) && new RegExp(/^[0-9]+$/).test(value);
+    return (
+      ['string', 'number', 'bigint'].includes(typeof value) && new RegExp(/^[0-9]+$/).test(value)
+    );
   }
 }
