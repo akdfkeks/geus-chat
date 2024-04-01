@@ -1,6 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { WsException } from '@nestjs/websockets';
-import { ERROR } from 'src/common/error/error';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { UserRepository } from 'src/repository/user.repository';
 import * as bcrypt from 'bcrypt';
 import { JWTHelper } from 'src/common/util/jwt.helper';
@@ -16,15 +14,6 @@ export class AuthService {
   constructor(private readonly userRepository: UserRepository) {}
 
   public async login(dto: IUserLoginDto) {
-    Wrapper.TryOrThrow(
-      () => typia.assertEquals<IUserLoginDto>(dto),
-      new BadRequestException({
-        code: '123-123',
-        title: '로그인에 실패했습니다.',
-        message: '요청 형식이 올바르지 않습니다.',
-      }),
-    );
-
     const user = await this.userRepository.findUserByEmail(dto.email);
     const isPwCorrect = await bcrypt.compare(dto.password, user?.password || '');
 
@@ -74,15 +63,6 @@ export class AuthService {
   }
 
   public async refresh(dto: { accessToken: string; refreshToken: string }) {
-    Wrapper.TryOrThrow(
-      () => typia.assertEquals<{ accessToken: string; refreshToken: string }>(dto),
-      new BadRequestException({
-        code: '123-123',
-        title: '사용자 인증에 실패했습니다.',
-        message: '요청 형식이 올바르지 않습니다.',
-      }),
-    );
-
     const payload = JWTHelper.decode<JWTPayload>(dto.accessToken)();
     const refresh = await this.userRepository.findRefreshTokenByUserId(payload.uid);
 
