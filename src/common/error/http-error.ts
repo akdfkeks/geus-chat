@@ -8,8 +8,8 @@ export const INTERNAL_SERVER_ERROR: ErrorCause = {
 
 export const BAD_REQUEST: ErrorCause = {
   code: '100-001',
-  title: '',
-  message: '',
+  title: '요청을 처리할 수 없습니다.',
+  message: '요청 형식이 올바르지 않습니다.',
 };
 
 export const NO_PERMISSION: ErrorCause = {
