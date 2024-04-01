@@ -2,6 +2,7 @@ import { ArgumentsHost, Catch, ExceptionFilter, HttpException } from '@nestjs/co
 import { TypeGuardError } from 'typia';
 import { Request, Response } from 'express';
 import { LogLevel, LoggerService } from 'src/module/winston.module';
+import { INTERNAL_SERVER_ERROR } from 'src/common/error/http-error';
 
 @Catch()
 export class GlobalHttpExceptionFilter implements ExceptionFilter {
@@ -26,11 +27,7 @@ export class GlobalHttpExceptionFilter implements ExceptionFilter {
         message: (exception.getResponse() as any).message || '',
       });
     } else {
-      res.status(500).json({
-        code: '999-999',
-        title: 'Internal server error',
-        message: null,
-      });
+      res.status(500).json(INTERNAL_SERVER_ERROR);
     }
   }
 }

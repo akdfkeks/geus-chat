@@ -1,6 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ChannelRepository } from 'src/repository/channel.repository';
 import { MessageRepository } from 'src/repository/message.repository';
+import * as error from 'src/common/error/http-error';
 
 @Injectable()
 export class ChannelService {
@@ -24,11 +25,7 @@ export class ChannelService {
     limit: number;
   }) {
     if (!this.isMemberOfChannel(dto.userId, dto.channelId)) {
-      throw new UnauthorizedException({
-        code: '123-123',
-        title: '대화내역을 불러오지 못했습니다.',
-        message: '잘못된 요청입니다.',
-      });
+      throw new UnauthorizedException(error.MSG_HISTORY_NOT_MEMBER);
     }
 
     return this.messageRepository.getMessagesByQuery({
