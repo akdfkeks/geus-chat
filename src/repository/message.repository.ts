@@ -11,7 +11,7 @@ import { Message } from 'src/structure/message';
 export class MessageRepository {
   constructor(@InjectConnection() private readonly mongo: Db) {}
 
-  public async saveMessage(m: Message.RecvDto & { uid: string }) {
+  public async saveMessage(m: Message.RecvDto & { uid: string; files?: Array<Message.FileDto> }) {
     const msg = Message.toModel(m);
     return this.mongo
       .collection<Message.Model>(MESSAGE_HISTORY)

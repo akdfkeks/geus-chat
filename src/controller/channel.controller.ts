@@ -4,9 +4,12 @@ import {
   Get,
   Param,
   ParseIntPipe,
+  Post,
   Query,
+  UploadedFiles,
   UseFilters,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ReqUser } from 'src/common/decorator/user';
 import { UserGuard } from 'src/common/guard/jwt.guard';
@@ -15,6 +18,7 @@ import { ChannelService } from 'src/service/channel.service';
 import { SnowFlake } from 'src/common/util/snowflake';
 import { ParseBigIntPipe } from 'src/common/pipe/parse-bigint.pipe';
 import { DEFAULT_FIND_MESSAGE_LIMIT as FIND_MESSAGE_LIMIT } from 'src/common/constant/message';
+import { ImagesInterceptor } from 'src/common/interceptor/image.interceptor';
 
 @UseFilters(BadRequestFilter)
 @UseGuards(UserGuard)
@@ -56,5 +60,15 @@ export class ChannelController {
       channelId: channelId,
       messages: await this.channelService.getMessageHistory({ userId, channelId, before, limit }),
     };
+  }
+
+  @Post('/:channelId/message')
+  @UseInterceptors(ImagesInterceptor)
+  public async onSendMessageRequest(
+    @ReqUser() userId: bigint,
+    @UploadedFiles() files: Array<Express.Multer.File>,
+    @Param('channelId', ParseBigIntPipe) channelId: bigint,
+  ) {
+    return this.channelService.sendMediaMessage({ userId, channelId, files });
   }
 }

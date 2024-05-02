@@ -6,8 +6,8 @@ export namespace Message {
   export interface Model {
     _id: Long;
     channel_id: Long;
-    content_type: number;
     data: string;
+    files: Array<FileDto>;
     time: Date;
     author_id: Long;
   }
@@ -17,22 +17,26 @@ export namespace Message {
     data: string & tags.MinLength<1> & tags.MaxLength<2000>;
   }
 
+  export interface FileDto {
+    origin: string;
+    resized: string;
+  }
   export interface SendDto {
     mid: string; // Message ID
     cid: string; // Channel ID
-    ctype: number; // Message Type {0: Text, 1: Image, 2: File, ...}
     data: string;
+    files: Array<FileDto>;
     time: string; // ISO 8601
     uid: string;
   }
 
-  export const toModel = (dto: Message.RecvDto & { uid: string }): Message.Model => {
+  export const toModel = (dto: Message.RecvDto & { uid: string; files?: Array<FileDto> }): Message.Model => {
     return {
       // _id: new Long(SnowFlake.generate(), true),
       _id: Long.fromBigInt(SnowFlake.generate(), true),
       channel_id: Long.fromString(dto.cid, true, 10),
-      content_type: 0, // temp.
       data: dto.data,
+      files: dto.files ?? [],
       time: new Date(),
       author_id: Long.fromString(dto.uid, true, 10),
     };
@@ -42,8 +46,8 @@ export namespace Message {
     return {
       mid: model._id.toString(),
       cid: model.channel_id.toString(),
-      ctype: model.content_type,
       data: model.data,
+      files: model.files,
       time: model.time.toISOString(),
       uid: model.author_id.toString(),
     };

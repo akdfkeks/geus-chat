@@ -9,9 +9,19 @@ import { WinstonModule } from 'src/module/winston.module';
 import { GlobalHttpExceptionFilter } from 'src/common/filter/GlobalHttpException.filter';
 import { APP_FILTER } from '@nestjs/core';
 import { HttpRequestLogger } from 'src/common/middleware/http-request-logger.middleware';
+import { AwsModule } from 'src/module/aws.module';
 
 @Module({
-  imports: [EnvConfigModule, ChannelModule, CacheModule, AuthModule, PrismaModule, MongoModule, WinstonModule],
+  imports: [
+    EnvConfigModule,
+    ChannelModule,
+    CacheModule,
+    AuthModule,
+    PrismaModule,
+    MongoModule,
+    WinstonModule,
+    AwsModule,
+  ],
   controllers: [],
   providers: [
     {

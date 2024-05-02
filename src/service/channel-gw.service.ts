@@ -84,6 +84,18 @@ export class ChannelGWService implements OnModuleInit, OnModuleDestroy {
     return this.dispatch(client, data);
   }
 
+  public async broadcastMedia(dto: { uid: bigint; cid: bigint; files: Array<Message.FileDto> }) {
+    const message = await this.messageRepo.saveMessage({
+      cid: dto.cid.toString(),
+      data: '',
+      uid: dto.uid.toString(),
+      files: dto.files,
+    });
+
+    this.server.to(dto.cid.toString()).emit('event', { op: SendOP.DISPATCH_MESSAGE, d: message });
+    return;
+  }
+
   private async tryAuthenticate(client: Socket) {
     const auth = client.handshake.headers.authorization;
     if (isNil(auth)) return false;
