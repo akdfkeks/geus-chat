@@ -1,6 +1,7 @@
-import { ObjectCannedACL, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { FileUtil } from 'src/common/util/file.util';
 
 @Injectable()
 export class AwsService {
@@ -16,18 +17,15 @@ export class AwsService {
     });
   }
 
-  public async uploadToS3(files: Array<Express.Multer.File & { extension: string; objectKey: string }>) {
+  public async uploadImageToS3(files: Array<Express.Multer.File & { objectKey: string }>) {
     return await Promise.allSettled(
       files.map((file) =>
         this.s3Client.send(
           new PutObjectCommand({
-            Bucket: this.config.get('AWS.S3.BUCKET_NAME')!,
-            Key: `attachments/${file.objectKey}${file.extension}`,
+            Bucket: this.config.get('AWS.S3.BUCKET')!,
+            Key: file.objectKey,
             Body: file.buffer,
             ContentType: file.mimetype,
-            Metadata: {
-              OriginalName: file.originalname,
-            },
           }),
         ),
       ),
@@ -35,12 +33,15 @@ export class AwsService {
       .then((result) =>
         result.map((e, i) => {
           return {
-            success: e.status === 'fulfilled',
-            url:
+            key: files[i].objectKey,
+            result:
               e.status === 'fulfilled'
-                ? `https://${this.config.get('AWS.S3.BUCKET_NAME')!}.s3.${this.config.get(
-                    'AWS.S3.REGION',
-                  )!}.amazonaws.com/attachments/${files[i].objectKey}${files[i].extension}`
+                ? {
+                    origin: FileUtil.keyToS3ObjectURL(files[i].objectKey),
+                    resized: FileUtil.keyToS3ObjectURL(files[i].objectKey, {
+                      bucket: this.config.get('AWS.S3.BUCKET_RESIZED'),
+                    }),
+                  }
                 : null,
           };
         }),

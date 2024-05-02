@@ -12,6 +12,7 @@ import { ChannelController } from 'src/controller/channel.controller';
 import { MongoModule } from './mongo.module';
 import { MessageRepository } from 'src/repository/message.repository';
 import { ChannelService } from 'src/service/channel.service';
+import { AwsService } from 'src/service/aws.service';
 
 @Module({
   imports: [MongoModule],
@@ -29,6 +30,7 @@ import { ChannelService } from 'src/service/channel.service';
     UserRepository,
     ChannelMemberRepository,
     MessageRepository,
+    AwsService,
   ],
   exports: [],
 })

@@ -1,10 +1,16 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { FileUtil } from 'src/common/util/file.util';
 import { ChannelRepository } from 'src/repository/channel.repository';
 import { MessageRepository } from 'src/repository/message.repository';
+import { AwsService } from 'src/service/aws.service';
+import { ChannelGWService } from 'src/service/channel-gw.service';
+import { Message } from 'src/structure/message';
 
 @Injectable()
 export class ChannelService {
   constructor(
+    private readonly channelGateway: ChannelGWService,
+    private readonly awsService: AwsService,
     private readonly channelRepository: ChannelRepository,
     private readonly messageRepository: MessageRepository,
   ) {}
@@ -31,6 +37,22 @@ export class ChannelService {
       before: dto.before,
       limit: dto.limit,
     });
+  }
+
+  public async sendMediaMessage(dto: { userId: bigint; channelId: bigint; files: Array<Express.Multer.File> }) {
+    const files = (await this.awsService.uploadImageToS3(FileUtil.toUploadable(dto.files, { prefix: 'images/' })))
+      .filter((value) => value.result !== null)
+      .map((v) => {
+        return { origin: v.result!.origin, resized: v.result!.resized };
+      });
+
+    await this.channelGateway.broadcastMedia({
+      cid: dto.channelId,
+      uid: dto.userId,
+      files,
+    });
+
+    return { message: `${files.length} files are uploaded.` };
   }
 
   private async isMemberOfChannel(userId: bigint, channelId: bigint) {
