@@ -1,4 +1,6 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import * as ER from 'src/common/error/rest/expected';
+import { ErrorUtil } from 'src/common/util/error.util';
 import { SnowFlake } from 'src/common/util/snowflake';
 import { PrismaService } from 'src/service/prisma.service';
 import { Channel } from 'src/structure/channel';
@@ -20,11 +22,7 @@ export class ChannelRepository {
         };
       })
       .catch((e) => {
-        throw new InternalServerErrorException({
-          code: '123-123',
-          title: 'Internal server exception',
-          message: '',
-        });
+        throw ErrorUtil.notFound(ER.NO_SUCH_CHANNEL);
       });
   }
 

@@ -1,10 +1,12 @@
 import { ArgumentMetadata, BadRequestException, PipeTransform } from '@nestjs/common';
+import { NOT_PARSABLE } from 'src/common/error/rest/expected';
+import { ErrorUtil } from 'src/common/util/error.util';
 import { isNil } from 'src/common/util/utils';
 
 export class ParseIntPipe implements PipeTransform {
   public transform(value: any, meta: ArgumentMetadata) {
     if (isNil(value) || !this.isParsable(value)) {
-      throw new BadRequestException();
+      throw ErrorUtil.badRequest(NOT_PARSABLE);
     }
     return Number(value);
   }

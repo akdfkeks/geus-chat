@@ -1,10 +1,11 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { MESSAGE_HISTORY_NO_PERMIT } from 'src/common/error/rest/expected';
+import { ErrorUtil } from 'src/common/util/error.util';
 import { FileUtil } from 'src/common/util/file.util';
 import { ChannelRepository } from 'src/repository/channel.repository';
 import { MessageRepository } from 'src/repository/message.repository';
 import { AwsService } from 'src/service/aws.service';
 import { ChannelGWService } from 'src/service/channel-gw.service';
-import { Message } from 'src/structure/message';
 
 @Injectable()
 export class ChannelService {
@@ -25,11 +26,7 @@ export class ChannelService {
 
   public async getMessageHistory(dto: { userId: bigint; channelId: bigint; before: bigint; limit: number }) {
     if (!this.isMemberOfChannel(dto.userId, dto.channelId)) {
-      throw new UnauthorizedException({
-        code: '123-123',
-        title: '대화내역을 불러오지 못했습니다.',
-        message: '잘못된 요청입니다.',
-      });
+      throw ErrorUtil.unauthorized(MESSAGE_HISTORY_NO_PERMIT);
     }
 
     return this.messageRepository.getMessagesByQuery({

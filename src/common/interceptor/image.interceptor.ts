@@ -1,7 +1,8 @@
-import { BadRequestException } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import * as multer from 'multer';
+import { ErrorUtil } from 'src/common/util/error.util';
 import { FileUtil } from 'src/common/util/file.util';
+import * as multer from 'multer';
+import * as ER from 'src/common/error/rest/expected';
 
 export const ImagesInterceptor = FilesInterceptor('files', 10, {
   storage: multer.memoryStorage(), // it can cause out of memory
@@ -11,20 +12,15 @@ export const ImagesInterceptor = FilesInterceptor('files', 10, {
   },
   fileFilter: (req, file, cb) => {
     if (FileUtil.isOversized(file, 5 * 1024 * 1024)) {
-      throw new BadRequestException({
-        code: '000-000',
-        title: '사진 전송에 실패했습니다.',
-        message: '5MB 이하의 파일만 전송할 수 있습니다.',
-      });
+      throw ErrorUtil.badRequest(ER.FILES_ARE_OVERSIZED);
     }
 
     if (!FileUtil.isImage(file)) {
-      new BadRequestException({
-        code: '000-000',
-        title: '사진 전송에 실패했습니다.',
-        message: '지원되지 않는 형식입니다.',
-      });
+      throw ErrorUtil.badRequest(ER.FILES_ARE_UNSUP_TYPE);
     }
+
+    // 한글 파일명 파싱 관련 문제
+    file.originalname = Buffer.from(file.originalname, 'latin1').toString('utf-8');
 
     cb(null, true);
   },

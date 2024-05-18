@@ -1,6 +1,8 @@
 import { Injectable, CanActivate, ExecutionContext, BadRequestException, UnauthorizedException } from '@nestjs/common';
+import { ErrorUtil } from 'src/common/util/error.util';
 import { JWTHelper } from 'src/common/util/jwt.helper';
 import { JWTPayload } from 'src/structure/dto/Auth';
+import * as ER from 'src/common/error/rest/expected';
 
 @Injectable()
 export class UserGuard implements CanActivate {
@@ -11,15 +13,10 @@ export class UserGuard implements CanActivate {
       request['user'] = { uid: JWTHelper.verify<JWTPayload>(token)(JWT_ACCESS_SECRET)().uid };
       return true;
     } catch (e) {
-      throw new UnauthorizedException({
-        code: '123-123',
-        title: 'Unauthorized Exception',
-        message: '요청을 실행할 권한이 없습니다.',
-      });
+      throw ErrorUtil.unauthorized(ER.NO_ACCESS_TOKEN);
     }
   }
 }
-
 // Temp
 export const JWT_ACCESS_SECRET = 'jwt_access_secret';
 export const JWT_REFRESH_SECRET = 'jwt_refresh_secret';

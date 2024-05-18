@@ -6,10 +6,12 @@ import { AuthModule } from './auth.module';
 import { PrismaModule } from './prisma.module';
 import { MongoModule } from './mongo.module';
 import { WinstonModule } from 'src/module/winston.module';
-import { GlobalHttpExceptionFilter } from 'src/common/filter/GlobalHttpException.filter';
+import { GlobalExceptionFilter } from 'src/common/filter/rest/Global.filter';
 import { APP_FILTER } from '@nestjs/core';
 import { HttpRequestLogger } from 'src/common/middleware/http-request-logger.middleware';
 import { AwsModule } from 'src/module/aws.module';
+import { ExpectedExceptionFilter } from 'src/common/filter/rest/Expected.filter';
+import { HttpExceptionFilter } from 'src/common/filter/rest/Http.filter';
 
 @Module({
   imports: [
@@ -25,8 +27,16 @@ import { AwsModule } from 'src/module/aws.module';
   controllers: [],
   providers: [
     {
-      provide: APP_FILTER,
-      useClass: GlobalHttpExceptionFilter,
+      provide: APP_FILTER, // 3rd
+      useClass: GlobalExceptionFilter,
+    },
+    {
+      provide: APP_FILTER, // 2nd
+      useClass: HttpExceptionFilter,
+    },
+    {
+      provide: APP_FILTER, // 1st
+      useClass: ExpectedExceptionFilter,
     },
   ],
   exports: [],

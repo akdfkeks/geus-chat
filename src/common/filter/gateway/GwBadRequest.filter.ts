@@ -1,5 +1,5 @@
 import { ArgumentsHost, Catch } from '@nestjs/common';
-import { GwExceptionFilter } from 'src/common/filter/GwException.filter';
+import { GwExceptionFilter } from 'src/common/filter/gateway/GwException.filter';
 import { GatewayException, INVALID_FORMAT } from 'src/structure/dto/Exception';
 import { TypeGuardError } from 'typia';
 

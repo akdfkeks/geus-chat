@@ -1,19 +1,13 @@
-import { Inject, Injectable, NestMiddleware, forwardRef } from '@nestjs/common';
+import { Inject, Injectable, NestMiddleware } from '@nestjs/common';
 import { NextFunction, Request, Response } from 'express';
-import { LogLevel, LoggerService } from 'src/module/winston.module';
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import { Logger } from 'winston';
 
 @Injectable()
 export class HttpRequestLogger implements NestMiddleware {
-  constructor(
-    @Inject(forwardRef(() => LoggerService))
-    private readonly logger: LoggerService,
-  ) {}
+  constructor(@Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger) {}
 
   use(req: Request, res: Response, next: NextFunction) {
-    res.on('finish', () => {
-      this.logger.log(LogLevel.DEBUG, 'request logging', { data: { headers: req.headers } });
-    });
-
     next();
   }
 }

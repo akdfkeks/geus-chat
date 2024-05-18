@@ -13,14 +13,13 @@ import {
 } from '@nestjs/common';
 import { ReqUser } from 'src/common/decorator/user';
 import { UserGuard } from 'src/common/guard/jwt.guard';
-import { BadRequestFilter } from 'src/common/filter/BadRequest.filter';
 import { ChannelService } from 'src/service/channel.service';
 import { SnowFlake } from 'src/common/util/snowflake';
 import { ParseBigIntPipe } from 'src/common/pipe/parse-bigint.pipe';
 import { DEFAULT_FIND_MESSAGE_LIMIT as FIND_MESSAGE_LIMIT } from 'src/common/constant/message';
 import { ImagesInterceptor } from 'src/common/interceptor/image.interceptor';
 
-@UseFilters(BadRequestFilter)
+@UseFilters()
 @UseGuards(UserGuard)
 @Controller('/v2/channel')
 export class ChannelController {

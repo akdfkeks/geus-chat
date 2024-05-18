@@ -1,4 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import * as ER from 'src/common/error/rest/expected';
+import { ErrorUtil } from 'src/common/util/error.util';
 import { PrismaService } from 'src/service/prisma.service';
 
 @Injectable()
@@ -10,11 +12,7 @@ export class UserRepository {
       .findUnique({ where: { id: BigInt(id) } })
       .then((rst) => ({ ...rst, id }))
       .catch((e) => {
-        throw new NotFoundException({
-          code: '000-000',
-          title: '사용자 조회에 실패했습니다.',
-          message: '존재하지 않는 사용자입니다.',
-        });
+        throw ErrorUtil.notFound(ER.NO_SUCH_USER);
       });
   }
 
