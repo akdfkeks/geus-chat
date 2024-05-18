@@ -1,6 +1,8 @@
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import * as ER from 'src/common/error/rest/expected';
+import { ErrorUtil } from 'src/common/util/error.util';
 import { FileUtil } from 'src/common/util/file.util';
 
 @Injectable()
@@ -47,11 +49,7 @@ export class AwsService {
         }),
       )
       .catch((e) => {
-        throw new InternalServerErrorException({
-          code: '000-000',
-          title: 'Internal Server Error',
-          message: 'Failed to upload files to Storage.',
-        });
+        throw ErrorUtil.internal(ER.FILES_UPLOAD_FAILED_UNKNOWN);
       });
   }
 }

@@ -1,4 +1,4 @@
-import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { Injectable, OnModuleInit, OnModuleDestroy, Inject } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { GatewayException } from 'src/structure/dto/Exception';
 import * as error from 'src/structure/dto/Exception';
@@ -7,7 +7,7 @@ import { AuthService } from './auth.service';
 import typia from 'typia';
 import { ConnectionService } from './connection.service';
 import { MessageRepository } from 'src/repository/message.repository';
-import { LogLevel, LoggerService } from 'src/module/winston.module';
+import { LogLevel } from 'src/module/winston.module';
 import { isFalsy, isNil, isTruthy } from 'src/common/util/utils';
 import { Wrapper } from 'src/common/util/wrapper';
 import { ChannelRepository } from 'src/repository/channel.repository';
@@ -16,6 +16,8 @@ import { SendOP, RecvOP } from 'src/common/constant/message';
 import { Message } from 'src/structure/message';
 import * as EVENT from 'src/common/constant/event';
 import { EventUtil } from 'src/common/util/event.util';
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import { Logger } from 'winston';
 
 @Injectable()
 export class ChannelGWService implements OnModuleInit, OnModuleDestroy {
@@ -27,7 +29,8 @@ export class ChannelGWService implements OnModuleInit, OnModuleDestroy {
     private readonly userRepo: UserRepository,
     private readonly channelRepo: ChannelRepository,
     private readonly messageRepo: MessageRepository,
-    private readonly logger: LoggerService,
+    @Inject(WINSTON_MODULE_PROVIDER)
+    private readonly logger: Logger,
   ) {}
 
   public async onModuleInit() {}

@@ -10,8 +10,8 @@ import {
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { GwBadRequestFilter } from 'src/common/filter/GwBadRequest.filter';
-import { GwExceptionFilter } from 'src/common/filter/GwException.filter';
+import { GwBadRequestFilter } from 'src/common/filter/gateway/GwBadRequest.filter';
+import { GwExceptionFilter } from 'src/common/filter/gateway/GwException.filter';
 import { ChannelGWService } from 'src/service/channel-gw.service';
 import { EventData } from 'src/structure/dto/Event';
 
