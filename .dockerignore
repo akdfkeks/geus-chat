@@ -1,10 +1,12 @@
+.github/
 .vscode/
-node_modules/
 dist/
-test/
 logs/
+node_modules/
+test/
 .eslintrc.js
 .gitignore
 .prettierrc
+*.env
 *.bat
 docker-compose.yml
