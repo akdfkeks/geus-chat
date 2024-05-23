@@ -28,8 +28,8 @@ export namespace FileUtil {
       region?: string;
     },
   ) => {
-    return `https://${option?.bucket ?? process.env['AWS.S3.BUCKET']}.s3.${
-      option?.region ?? process.env['AWS.S3.REGION']
+    return `https://${option?.bucket ?? process.env.AWS_S3_BUCKET}.s3.${
+      option?.region ?? process.env.AWS_S3_REGION
     }.amazonaws.com/${objectKey}`;
   };
 }

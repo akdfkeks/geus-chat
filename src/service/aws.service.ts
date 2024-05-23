@@ -11,10 +11,10 @@ export class AwsService {
 
   constructor(private readonly config: ConfigService) {
     this.s3Client = new S3Client({
-      region: config.get('AWS.S3.REGION')!,
+      region: config.get('AWS_S3_REGION')!,
       credentials: {
-        accessKeyId: config.get('AWS.S3.ACCESS_KEY_ID')!,
-        secretAccessKey: config.get('AWS.S3.SECRET_ACCESS_KEY')!,
+        accessKeyId: config.get('ACCESS_KEY_ID')!,
+        secretAccessKey: config.get('SECRET_ACCESS_KEY')!,
       },
     });
   }
@@ -24,7 +24,7 @@ export class AwsService {
       files.map((file) =>
         this.s3Client.send(
           new PutObjectCommand({
-            Bucket: this.config.get('AWS.S3.BUCKET')!,
+            Bucket: this.config.get('AWS_S3_BUCKET')!,
             Key: file.objectKey,
             Body: file.buffer,
             ContentType: file.mimetype,
@@ -41,7 +41,7 @@ export class AwsService {
                 ? {
                     origin: FileUtil.keyToS3ObjectURL(files[i].objectKey),
                     resized: FileUtil.keyToS3ObjectURL(files[i].objectKey, {
-                      bucket: this.config.get('AWS.S3.BUCKET_RESIZED'),
+                      bucket: this.config.get('AWS_S3_BUCKET_RESIZED'),
                     }),
                   }
                 : null,
