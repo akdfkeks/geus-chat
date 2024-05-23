@@ -10,6 +10,7 @@ export const EnvConfigModule = ConfigModule.forRoot({
     NODE_PORT: Joi.string().required(),
     REDIS_HOST: Joi.string().required(),
     REDIS_PORT: Joi.string().required(),
+    DATABASE_URL: Joi.string().required(),
     MONGODB_URL: Joi.string().required(),
     'AWS.S3.REGION': Joi.string().required(),
     'AWS.S3.BUCKET': Joi.string().required(),
