@@ -13,8 +13,8 @@ export class AwsService {
     this.s3Client = new S3Client({
       region: config.get('AWS_S3_REGION')!,
       credentials: {
-        accessKeyId: config.get('ACCESS_KEY_ID')!,
-        secretAccessKey: config.get('SECRET_ACCESS_KEY')!,
+        accessKeyId: config.get('AWS_S3_ACCESS_KEY_ID')!,
+        secretAccessKey: config.get('AWS_S3_SECRET_ACCESS_KEY')!,
       },
     });
   }
