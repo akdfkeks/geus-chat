@@ -4,6 +4,7 @@ import * as Joi from 'joi';
 export const EnvConfigModule = ConfigModule.forRoot({
   isGlobal: true,
   cache: true,
+  ignoreEnvVars: false,
   ignoreEnvFile: process.env.NODE_ENV == 'local' ? false : true,
   envFilePath: `${process.env.NODE_ENV ?? 'local'}.env`,
   validationSchema: Joi.object({
